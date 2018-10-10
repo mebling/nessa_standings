@@ -1,16 +1,23 @@
 import requests
 import lxml.html as lh
 import pandas as pd
+from datetime import datetime
 
 
 BASE_URL = "http://taboracademy.net/nessa/"
 URL = BASE_URL + "standings.asp"
-YEARS = ["_09", "_10", "_11", "_12", "_13", "_14", "_15", "_16", "_17", ""]
+START_YEAR = 9
 
 
 class Scraper:
-    def __init__(self, url):
+    def __init__(self, url, year=None):
         self.url = url
+        if not year:
+            self.url = url
+        elif year < 10:
+            self.url = url + "_0{}".format(year)
+        else:
+            self.url = url + "_{}".format(year)
 
     @property
     def _school_links(self):
@@ -22,6 +29,7 @@ class Scraper:
         for link in self._school_links:
             SchoolScraper(link).scrape()
 
+
 class SchoolScraper:
     def __init__(self, link):
         self.school_name = link.text_content()
@@ -32,8 +40,14 @@ class SchoolScraper:
 
 
 def scrape_all():
-    for year in YEARS:
-        Scraper(URL + year).scrape()
+    year = START_YEAR
+    while True:
+        scraper = Scraper(URL, year)
+        if not scraper.can_scrape:
+            Scraper(URL).scrape()
+            return
+        scraper.scrape()
+        year += 1
 
 
 if __name__ == '__main__':

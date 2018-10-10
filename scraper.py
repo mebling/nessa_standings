@@ -11,21 +11,30 @@ START_YEAR = 9
 
 class Scraper:
     def __init__(self, url, year=None):
+        self.year = year
         self.url = url
         if not year:
             self.url = url
         elif year < 10:
-            self.url = url + "_0{}".format(year)
+            self.url = url.replace("nessa", "nessa_0{}".format(year))
         else:
-            self.url = url + "_{}".format(year)
+            self.url = url.replace("nessa", "nessa_{}".format(year))
+
+    @property
+    def _doc(self):
+        page = requests.get(self.url)
+        return lh.fromstring(page.content)
 
     @property
     def _school_links(self):
-        page = requests.get(self.url)
-        doc = lh.fromstring(page.content)
-        return doc.xpath('//tr//a')[2:]
+        return self._doc.xpath('//tr//a')[2:]
+
+    @property
+    def can_scrape(self):
+        return "Detailed Error" not in self._doc.text_content()
 
     def scrape(self):
+        print("SCRAPING FOR THE YEAR '{}".format(self.year))
         for link in self._school_links:
             SchoolScraper(link).scrape()
 
@@ -36,6 +45,7 @@ class SchoolScraper:
         self.school_url = link.attrib['href']
 
     def scrape(self):
+        print("SCRAPING FOR {}".format(self.school_name), "needs to be implemented")
         pass
 
 

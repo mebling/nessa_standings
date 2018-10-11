@@ -12,7 +12,7 @@ class BaseModel(Model):
 
 class School(BaseModel):
     name = CharField(unique=True, null=False)
-    external_id = IntegerField(unique=True, null=False)
+    external_id = IntegerField(null=True)
 
     @classmethod
     def find_or_create(cls, name, external_id):

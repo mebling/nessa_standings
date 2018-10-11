@@ -36,6 +36,6 @@ class Scraper(BaseScraper):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
         if self.is_valid:
             for link in self._school_links:
-                ResultsScraper(link).scrape()
+                ResultsScraper(self.url.split("standings.asp")[0], link).scrape()
             return True
         return False

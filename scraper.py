@@ -1,4 +1,4 @@
-from school_scraper import SchoolScraper
+from results_scraper import ResultsScraper
 from functools import lru_cache
 from base_scraper import BaseScraper
 
@@ -36,6 +36,6 @@ class Scraper(BaseScraper):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
         if self.is_valid:
             for link in self._school_links:
-                SchoolScraper(link).scrape()
+                ResultsScraper(link).scrape()
             return True
         return False

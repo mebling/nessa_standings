@@ -1,23 +1,17 @@
-from functools import lru_cache
 from base_scraper import BaseScraper
+from models import School
 
 
-BASE_URL = "http://taboracademy.net/nessa/"
+URL = "http://www.kistcon.com/nessa/enter.asp"
 
 
 class SchoolScraper(BaseScraper):
-    def __init__(self, link):
-        print(link.text_content())
-        self.name = link.text_content()
-        self.url = BASE_URL + link.attrib['href']
+    def __init__(self):
+        self.url = URL
 
     def scrape(self):
-        data = []
-        tr_elements = self._doc.xpath('//tr')
-        columns = [t.text_content() for t in tr_elements[0]]
-        for elem in tr_elements[1:]:
-            match = {}
-            for col, val in zip(columns, elem):
-                match[col] = val.text_content()
-            data.append(match)
-        print(data)
+        fields = self._doc.xpath("//select[@name='school1']//option")
+        for field in fields[1:]:
+            school_name = field.text_content().replace("\r\n", "")
+            school_id = int(field.attrib['value'])
+            School.find_or_create(school_name, school_id)

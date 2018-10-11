@@ -25,7 +25,7 @@ class School(BaseModel):
 class Race(BaseModel):
     school_id = ForeignKeyField(School, backref='races')
     opponent_id = ForeignKeyField(School, backref='opponent_races')
-    date = DateTimeField(default=datetime.datetime.now)
+    date = IntegerField(null=False)
     school_score = IntegerField(null=False)
     opponent_score = IntegerField(null=False)
 

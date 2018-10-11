@@ -15,12 +15,7 @@ class ResultsScraper(BaseScraper):
     @property
     @lru_cache()
     def _school(self):
-        external_id = int(self.url.split("schoolid=")[1])
-        school = School.get_or_none(name=self.name) or School.get_or_none(external_id) or School()
-        school.name = self.name
-        school.external_id = external_id
-        school.save()
-        return school
+        return School.find_or_create(name=self.name)
 
     # The keys are Date, Opponent, Result, Score, Comments
     def _create_race(self, match):

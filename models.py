@@ -15,11 +15,8 @@ class School(BaseModel):
     external_id = IntegerField(null=True)
 
     @classmethod
-    def find_or_create(cls, name, external_id):
-        school = cls.get_or_none(external_id=external_id) or cls(external_id=external_id)
-        school.name = name
-        school.save()
-        return school
+    def find_or_create(cls, name):
+        return cls.get_or_none(name=name) or cls.create(name=name)
 
 
 class Race(BaseModel):

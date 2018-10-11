@@ -13,5 +13,4 @@ class SchoolScraper(BaseScraper):
         fields = self._doc.xpath("//select[@name='school1']//option")
         for field in fields[1:]:
             school_name = field.text_content().replace("\r\n", "")
-            school_id = int(field.attrib['value'])
-            School.find_or_create(school_name, school_id)
+            School.find_or_create(school_name)

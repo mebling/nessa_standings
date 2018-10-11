@@ -5,7 +5,7 @@ from tqdm import tqdm
 from functools import lru_cache
 
 def get_rating(team_name, date):
-    return glicko_scores(date)[team_name].rating.rated_at
+    return glicko_scores(date)[team_name].rating.mu
 
 
 @lru_cache()
@@ -21,9 +21,3 @@ def glicko_scores(date):
         series.extend([[LOSS, opponent_rating.rating]] * race.opponent_score)
         scores[school.name].rate(series)
     return scores
-
-
-import datetime
-scores = glicko_scores(datetime.datetime.now())
-for school_name, rating in scores.items():
-    print("{}: {}".format(school_name, rating.rating.rated_at))

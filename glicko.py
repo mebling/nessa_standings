@@ -57,15 +57,7 @@ class Glicko(object):
             mu = self.mu
         if sigma is None:
             sigma = self.sigma
-        rating = Rating(mu, sigma, rated_at)
-        self.rating = rating
-        return rating
-
-    def volatilize(self, rating):
-        if rating.rated_at is None:
-            return rating
-        sigma = min(math.sqrt(rating.sigma ** 2 + c ** 2 * t), self.sigma)
-        return self.create_rating(rating.mu, sigma, rating.rated_at)
+        self.rating = Rating(mu, sigma, rated_at)
 
     def reduce_impact(self, rating):
         """The original form is `g(RD)`. This function reduces the impact of

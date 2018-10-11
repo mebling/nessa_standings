@@ -1,0 +1,45 @@
+<!doctype html>
+<script src="http://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<script type="text/javascript">
+  var chart_data = {{ highchart_json|tojson|safe }};
+  var tooltip = {{ tooltip_json|tojson|safe}};
+
+  Highcharts.chart('container', {
+      chart: {
+          type: 'spline'
+      },
+      title: {
+          text: 'Glicko NESSA Rating'
+      },
+      xAxis: {
+          type: 'datetime',
+          title: {
+              text: 'Date'
+          }
+      },
+      yAxis: {
+          title: {
+              text: 'Rating'
+          },
+          min: 0
+      },
+      tooltip: {
+          formatter: function() {
+              console.log(this.x)
+              return tooltip[this.series.name][this.x];
+          }
+      },
+      plotOptions: {
+          spline: {
+              marker: {
+                  enabled: true
+              }
+          }
+      },
+
+      colors: ['#6CF', '#39F', '#06C', '#036', '#000'],
+      series: chart_data
+  });
+</script>

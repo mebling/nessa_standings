@@ -44,7 +44,7 @@ def chart_data():
         chart_data[school.name].append([race.date, scores[school.name].rating.mu])
         change = scores[school.name].rating.mu - previous_rating.rating.mu
         change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-        tooltip_data[school.name][race.date] = "{}\n -> {}-{} ({})".format(opponent.name, race.school_score, race.opponent_score, change)
+        tooltip_data[school.name][race.date] = "{} {}\n -> {}-{} ({})".format(datetime.datetime.fromtimestamp(race.date/1000.0).strftime("%b %d, %Y"), opponent.name, race.school_score, race.opponent_score, change)
     formatted = []
     for key, values in chart_data.items():
         formatted.append({ 'name': key, 'data': values })

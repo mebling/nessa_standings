@@ -42,7 +42,7 @@ def chart_data():
     for i, rating in tqdm(enumerate(glicko_ratings)):
         race = rating.race_id
         previous_rating = glicko_ratings[i-1].rating if i > 0 else 1500
-        data.append([race.date, rating])
+        data.append([race.date, rating.rating])
         change = rating.rating - previous_rating
         change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
         tooltip_data[rating.school_id.name][race.date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(datetime.datetime.fromtimestamp(race.date/1000.0).strftime("%b %d, %Y"), race.opponent_id.name, race.school_score, race.opponent_score, change)

@@ -15,7 +15,14 @@ class School(db.Model):
 
     @classmethod
     def find_or_create(cls, name):
-        return cls.query.filter_by(name=name).first() or cls.get_or_none(name=name) or cls.create(name=name)
+        existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
+        if existing:
+            return existing
+        else:
+            new = cls(name=name)
+            db.session.add(new)
+            db.session.commit()
+            return new
 
 
 class Race(db.Model):
@@ -24,19 +31,26 @@ class Race(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
     opponent_id = db.Column('opponent_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
-    date = db.Column(db.Integer, nullable=False, index=True)
+    date = db.Column(db.Date, nullable=False, index=True)
     school_score = db.Column(db.Integer, nullable=False)
     opponent_score = db.Column(db.Integer, nullable=False)
 
-    school = relationship("School")
-    opponent = relationship("School")
+    school = relationship("School", foreign_keys=[school_id])
+    opponent = relationship("School", foreign_keys=[opponent_id])
 
     @classmethod
     def find_or_create(cls, **kargs):
         new_args = copy(kargs)
-        new_args['opponent'] = kargs['school']
-        new_args['school'] = kargs['opponent']
-        return cls.get_or_none(**kargs) or cls.get_or_none(**new_args) or cls.create(**kargs)
+        new_args['opponent_id'] = kargs['school_id']
+        new_args['school_id'] = kargs['opponent_id']
+        existing = cls.query.filter_by(**kargs).first() or cls.query.filter_by(**new_args).first()
+        if existing:
+            return existing
+        else:
+            new = cls(**kargs)
+            db.session.add(new)
+            db.session.commit()
+            return new
 
 
 class GlickoRating(db.Model):

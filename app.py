@@ -11,7 +11,7 @@ from models import db
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa_rankings"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa"
 db.init_app(app)
 migrate = Migrate(app, db)
 

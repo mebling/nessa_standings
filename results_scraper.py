@@ -22,10 +22,9 @@ class ResultsScraper(BaseScraper):
         results = [s for s in match['Score'].replace(" ", "").split("-") if s != ""]
         school_score, opponent_score = results
         date = parser.parse(match['Date'])
-        milliseconds = int(round(date.timestamp() * 1000))
         opponent_name = match['Opponent'].replace('At ', '')
-        opponent_school = School.get_or_none(name=opponent_name) or School.create(name=opponent_name)
-        Race.find_or_create(school=self._school.id, opponent=opponent_school.id, date=milliseconds, school_score=school_score, opponent_score=opponent_score)
+        opponent_school = School.find_or_create(name=opponent_name)
+        Race.find_or_create(school_id=self._school.id, opponent_id=opponent_school.id, date=date, school_score=school_score, opponent_score=opponent_score)
 
     def scrape(self):
         tr_elements = self._doc.xpath('//tr')

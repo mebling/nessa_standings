@@ -2,6 +2,7 @@ from scraper import Scraper
 from school_scraper import SchoolScraper
 from ratings import create_ratings
 import datetime
+from app import app
 
 
 START_YEAR = 9
@@ -16,5 +17,6 @@ def scrape_all():
 
 
 if __name__ == '__main__':
-    scrape_all()
-    create_ratings()
+    with app.app_context():
+        scrape_all()
+        create_ratings()

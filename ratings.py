@@ -8,7 +8,7 @@ from copy import copy
 
 def create_ratings():
     scores = defaultdict(Glicko)
-    races = db.session.query(Race).filter_by(Race.cached==False).order_by(Race.date)
+    races = db.session.query(Race).filter_by(Race.cached=False).order_by(Race.date)
     for race in races:
         school = race.school
         opponent = race.opponent

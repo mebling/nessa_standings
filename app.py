@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask import jsonify
 import datetime
 from flask_migrate import Migrate
-from models import db
+from models import db, School
 from ratings import chart_data
 import os
 

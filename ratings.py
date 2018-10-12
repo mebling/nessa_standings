@@ -2,14 +2,14 @@ from glicko import Glicko, WIN, LOSS
 from models import School, Race, GlickoRating, db
 from collections import defaultdict
 from tqdm import tqdm
-import datetime
+from datetime import datetime
 from copy import copy
 
 
 def create_ratings():
     scores = defaultdict(Glicko)
-    race_query = Race.select(Race.id, Race.school, Race.opponent_score, Race.school_score, Race.opponent).order_by(Race.date)
-    for race in tqdm(race_query):
+    races = db.session.query(Race).order_by(Race.date)
+    for race in races:
         school = race.school
         opponent = race.opponent
         opponent_rating = scores[opponent.name]
@@ -25,33 +25,37 @@ def create_ratings():
         scores[opponent.name].rate(opponent_series)
 
         # insert into the database
-        GlickoRating.create(race=race.id, school=school.id, rating=scores[school.name].rating.mu)
-        GlickoRating.create(race=race.id, school=opponent.id, rating=scores[opponent.name].rating.mu)
+        rating = GlickoRating(race_id=race.id, school_id=school.id, rating=scores[school.name].rating.mu)
+        db.session.add(rating)
+        db.session.commit()
     return scores
 
 
 # TODO need to list by school
+# values I need are race_data, opponent_name, school_name, rating
 def chart_data():
-    OpponentSchool = School.alias()
+    OpponentSchool = db.aliased(School)
     chart_data = []
     tooltip_data = defaultdict(dict)
-    glicko_ratings = (GlickoRating
-                        .select(Race, OpponentSchool, GlickoRating, School)
-                        .join(Race, on=(Race.id==GlickoRating.race))
-                        .join(School, on=(School.id==GlickoRating.school))
-                        .join(OpponentSchool, on=(Race.opponent==OpponentSchool.id))
-                        .order_by(School.name, Race.date))
+
+    glicko_ratings = (db.session
+                        .query(GlickoRating.rating, Race.date, OpponentSchool.name, School.name, Race.school_score, Race.opponent_score)
+                        .join(Race, Race.id == GlickoRating.race_id)
+                        .join(School, School.id == Race.school_id)
+                        .join(OpponentSchool, OpponentSchool.id==Race.opponent_id)
+                        .order_by(GlickoRating.school_id, Race.date))
+    count = glicko_ratings.count()
     data = []
-    for i, rating in enumerate(glicko_ratings):
-        previous_rating = glicko_ratings[i-1].rating if i > 0 else 1500
-        data.append([rating.race.date, rating.rating])
-        change = rating.rating - previous_rating
+    previous_rating = 1500
+    previous_school = None
+    for i, (rating, race_date, opponent_name, school_name, school_score, opponent_score) in enumerate(glicko_ratings):
+        data.append([datetime.combine(race_date, datetime.min.time()).timestamp(), rating])
+        change = rating - previous_rating
         change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-        tooltip_data[rating.school.name][rating.race.date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(datetime.datetime.fromtimestamp(rating.race.date/1000.0).strftime("%b %d, %Y"), rating.race.opponent.name, rating.race.school_score, rating.race.opponent_score, change)
-        if i == len(glicko_ratings)-1 or rating.school.name != glicko_ratings[i+1].school.name:
-            chart_data.append({'name': rating.school.name, 'data': data})
+        tooltip_data[school_name][race_date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(race_date.strftime("%b %d, %Y"), opponent_name, school_score, opponent_score, change)
+        if i == count-1 or school_name != previous_school:
+            chart_data.append({'name': school_name, 'data': data})
             data = []
+        previous_rating = rating
+        previous_school = school_name
     return chart_data, tooltip_data
-
-
-#print(chart_data())

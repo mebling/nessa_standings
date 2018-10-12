@@ -1,6 +1,6 @@
 from functools import lru_cache
 from base_scraper import BaseScraper
-from models import School, Race
+from models import School, Race, db
 from dateutil import parser
 import time
 
@@ -34,3 +34,4 @@ class ResultsScraper(BaseScraper):
             for col, val in zip(columns, elem):
                 match[col] = val.text_content()
             self._create_race(match)
+        db.session.commit()

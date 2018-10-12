@@ -5,7 +5,7 @@ from flask import jsonify
 import datetime
 from flask_migrate import Migrate
 from models import db
-#from ratings import chart_data
+from ratings import chart_data
 
 
 app = Flask(__name__)
@@ -25,7 +25,7 @@ def index():
 
 @app.route("/schools/<school_id>", methods=["GET"])
 def schools(school_id):
-    school = School.get(id=school_id)
+    school = School.filter_by(id=school_id).first()
     data, tooltip_data = chart_data()
     data = [d for d in data if d['name'] == school.name]
     return render_template("chart.html", highchart_json=data, tooltip_json=tooltip_data)

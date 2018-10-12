@@ -21,7 +21,6 @@ class School(db.Model):
         else:
             new = cls(name=name)
             db.session.add(new)
-            db.session.commit()
             return new
 
 
@@ -40,16 +39,12 @@ class Race(db.Model):
 
     @classmethod
     def find_or_create(cls, **kargs):
-        new_args = copy(kargs)
-        new_args['opponent_id'] = kargs['school_id']
-        new_args['school_id'] = kargs['opponent_id']
-        existing = cls.query.filter_by(**kargs).first() or cls.query.filter_by(**new_args).first()
+        existing = cls.query.filter_by(**kargs).first()
         if existing:
             return existing
         else:
             new = cls(**kargs)
             db.session.add(new)
-            db.session.commit()
             return new
 
 

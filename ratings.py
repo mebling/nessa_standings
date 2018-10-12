@@ -51,10 +51,11 @@ def chart_data():
     previous_rating = 1500
     previous_school = None
     for i, (rating, race_date, opponent_name, school_name, school_score, opponent_score) in enumerate(glicko_ratings):
-        data.append([datetime.combine(race_date, datetime.min.time()).timestamp(), rating])
+        millisecond_race_date = datetime.combine(race_date, datetime.min.time()).timestamp()
+        data.append([millisecond_race_date, rating])
         change = rating - previous_rating
         change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-        tooltip_data[school_name][race_date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(race_date.strftime("%b %d, %Y"), opponent_name, school_score, opponent_score, change)
+        tooltip_data[school_name][millisecond_race_date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(race_date.strftime("%b %d, %Y"), opponent_name, school_score, opponent_score, change)
         if i == count-1 or school_name != previous_school:
             chart_data.append({'name': school_name, 'data': data})
             data = []

@@ -7,9 +7,6 @@
   var tooltip = {{ tooltip_json|tojson|safe}};
 
   Highcharts.chart('container', {
-      chart: {
-          type: 'spline'
-      },
       title: {
           text: 'Glicko NESSA Rating'
       },
@@ -22,22 +19,13 @@
       yAxis: {
           title: {
               text: 'Rating'
-          },
-          min: 0
+          }
       },
       tooltip: {
           formatter: function() {
               return tooltip[this.series.name][this.x];
           }
       },
-      plotOptions: {
-          spline: {
-              marker: {
-                  enabled: true
-              }
-          }
-      },
-
       colors: ['#6CF', '#39F', '#06C', '#036', '#000'],
       series: chart_data
   });

@@ -14,7 +14,7 @@ CORS(app)
 @app.route('/', methods=['GET'])
 def index():
     data, tooltip_data = chart_data()
-    return render_template("chart.html", highchart_json=data[0:1], tooltip_json=tooltip_data)
+    return render_template("chart.html", highchart_json=data, tooltip_json=tooltip_data)
 
 
 @app.route("/schools/<school_id>", methods=["GET"])

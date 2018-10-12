@@ -6,15 +6,15 @@ import datetime
 from flask_migrate import Migrate
 from models import db
 from ratings import chart_data
+import os
 
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa"
-db.init_app(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 migrate = Migrate(app, db)
-
+db.init_app(app)
 
 
 @app.route('/', methods=['GET'])

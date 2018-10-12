@@ -21,6 +21,7 @@ class School(db.Model):
         else:
             new = cls(name=name)
             db.session.add(new)
+            db.session.commit()
             return new
 
 
@@ -45,6 +46,7 @@ class Race(db.Model):
         else:
             new = cls(**kargs)
             db.session.add(new)
+            db.session.commit()
             return new
 
 

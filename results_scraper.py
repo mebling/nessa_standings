@@ -34,4 +34,3 @@ class ResultsScraper(BaseScraper):
             for col, val in zip(columns, elem):
                 match[col] = val.text_content()
             self._create_race(match)
-        db.session.commit()

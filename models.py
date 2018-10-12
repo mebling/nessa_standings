@@ -23,7 +23,7 @@ class Race(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
-    opponent_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+    opponent_id = db.Column('opponent_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
     date = db.Column(db.Integer, nullable=False, index=True)
     school_score = db.Column(db.Integer, nullable=False)
     opponent_score = db.Column(db.Integer, nullable=False)

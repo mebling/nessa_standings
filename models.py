@@ -19,8 +19,8 @@ class School(BaseModel):
 
 
 class Race(BaseModel):
-    school_id = ForeignKeyField(School, backref='races')
-    opponent_id = ForeignKeyField(School, backref='opponent_races')
+    school = ForeignKeyField(School, backref='races')
+    opponent = ForeignKeyField(School, backref='opponent_races')
     date = IntegerField(null=False, index=True)
     school_score = IntegerField(null=False)
     opponent_score = IntegerField(null=False)
@@ -28,12 +28,12 @@ class Race(BaseModel):
     @classmethod
     def find_or_create(cls, **kargs):
         new_args = copy(kargs)
-        new_args['opponent_id'] = kargs['school_id']
-        new_args['school_id'] = kargs['opponent_id']
+        new_args['opponent'] = kargs['school']
+        new_args['school'] = kargs['opponent']
         return cls.get_or_none(**kargs) or cls.get_or_none(**new_args) or cls.create(**kargs)
 
 
 class GlickoRating(BaseModel):
-    school_id = ForeignKeyField(School, backref="glicko_ratings", null=False)
-    race_id = ForeignKeyField(Race, backref="glicko_ratings", null=False)
+    school = ForeignKeyField(School, backref="glicko_ratings", null=False)
+    race = ForeignKeyField(Race, backref="glicko_ratings", null=False)
     rating = FloatField(null=False)

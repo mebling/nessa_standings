@@ -2,7 +2,7 @@ from functools import lru_cache
 from base_scraper import BaseScraper
 from models import School, Race
 from dateutil import parser
-
+import time
 
 BASE_URL = "http://taboracademy.net/nessa/"
 
@@ -17,7 +17,6 @@ class ResultsScraper(BaseScraper):
     def _school(self):
         return School.find_or_create(name=self.name)
 
-    # The keys are Date, Opponent, Result, Score, Comments
     def _create_race(self, match):
         print(match)
         results = [s for s in match['Score'].replace(" ", "").split("-") if s != ""]

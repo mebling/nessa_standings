@@ -1,29 +1,35 @@
-from peewee import *
 import datetime
 from copy import copy
-
-db = SqliteDatabase('results.db')
-
-
-class BaseModel(Model):
-    class Meta:
-        database = db
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 
 
-class School(BaseModel):
-    name = CharField(unique=True, null=False, index=True)
+db = SQLAlchemy()
+
+
+class School(db.Model):
+    __tablename__ = 'schools'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False, index=True)
 
     @classmethod
     def find_or_create(cls, name):
-        return cls.get_or_none(name=name) or cls.create(name=name)
+        return cls.query.filter_by(name=name).first() or cls.get_or_none(name=name) or cls.create(name=name)
 
 
-class Race(BaseModel):
-    school = ForeignKeyField(School, backref='races')
-    opponent = ForeignKeyField(School, backref='opponent_races')
-    date = IntegerField(null=False, index=True)
-    school_score = IntegerField(null=False)
-    opponent_score = IntegerField(null=False)
+class Race(db.Model):
+    __tablename__ = 'races'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+    opponent_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+    date = db.Column(db.Integer, nullable=False, index=True)
+    school_score = db.Column(db.Integer, nullable=False)
+    opponent_score = db.Column(db.Integer, nullable=False)
+
+    school = relationship("School")
+    opponent = relationship("School")
 
     @classmethod
     def find_or_create(cls, **kargs):
@@ -33,7 +39,14 @@ class Race(BaseModel):
         return cls.get_or_none(**kargs) or cls.get_or_none(**new_args) or cls.create(**kargs)
 
 
-class GlickoRating(BaseModel):
-    school = ForeignKeyField(School, backref="glicko_ratings", null=False)
-    race = ForeignKeyField(Race, backref="glicko_ratings", null=False)
-    rating = FloatField(null=False)
+class GlickoRating(db.Model):
+    __tablename__ = 'glicko_ratings'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+    race_id = db.Column('races', db.Integer, db.ForeignKey("races.id"), nullable=False)
+    rating = db.Column(db.Float(), nullable=False)
+
+    school = relationship("School")
+    race = relationship("Race")

@@ -3,12 +3,18 @@ from flask import Flask, flash, request, redirect, url_for, render_template
 from flask_cors import CORS
 from flask import jsonify
 import datetime
-from ratings import chart_data
-from models import School
+from flask_migrate import Migrate
+from models import db
+#from ratings import chart_data
 
 
 app = Flask(__name__)
 CORS(app)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa_rankings"
+db.init_app(app)
+migrate = Migrate(app, db)
+
 
 
 @app.route('/', methods=['GET'])

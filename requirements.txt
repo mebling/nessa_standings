@@ -1,8 +1,6 @@
-tqdm==4.23.4
-Flask==0.12
-lxml==4.1.1
 requests==2.18.4
+Flask==1.0.2
+tqdm==4.23.4
+Flask_Cors==3.0.6
+lxml==4.1.1
 python_dateutil==2.7.3
-flask_cors==3.0.6
-peewee==3.7.1
-gunicorn==19.9.0

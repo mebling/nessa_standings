@@ -54,4 +54,4 @@ def chart_data():
     return chart_data, tooltip_data
 
 
-print(chart_data())
+#print(chart_data())

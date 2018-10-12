@@ -34,6 +34,7 @@ class Race(db.Model):
     date = db.Column(db.Date, nullable=False, index=True)
     school_score = db.Column(db.Integer, nullable=False)
     opponent_score = db.Column(db.Integer, nullable=False)
+    cached = db.Column(db.Boolean, default=False)
 
     school = relationship("School", foreign_keys=[school_id])
     opponent = relationship("School", foreign_keys=[opponent_id])

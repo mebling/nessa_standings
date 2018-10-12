@@ -9,6 +9,8 @@ from ratings import chart_data
 import os
 
 
+# DATABASE_URL = "postgresql://localhost/nessa"
+
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

@@ -8,7 +8,7 @@ from copy import copy
 
 def create_ratings():
     scores = defaultdict(Glicko)
-    races = db.session.query(Race).order_by(Race.date)
+    races = db.session.query(Race).filter_by(Race.cached==False).order_by(Race.date)
     for race in races:
         school = race.school
         opponent = race.opponent
@@ -27,6 +27,8 @@ def create_ratings():
         # insert into the database
         rating = GlickoRating(race_id=race.id, school_id=school.id, rating=scores[school.name].rating.mu)
         db.session.add(rating)
+        race.cached = True
+        db.session.add(race)
         db.session.commit()
     return scores
 

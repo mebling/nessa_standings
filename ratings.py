@@ -30,6 +30,7 @@ def create_ratings():
     return scores
 
 
+# TODO need to list by school
 def chart_data():
     OpponentSchool = School.alias()
     chart_data = []
@@ -40,19 +41,17 @@ def chart_data():
                         .join(School, on=(School.id==GlickoRating.school))
                         .join(OpponentSchool, on=(Race.opponent==OpponentSchool.id))
                         .order_by(School.name, Race.date))
-    print(glicko_ratings[0].__dict__)
     data = []
-    for i, rating in tqdm(enumerate(glicko_ratings)):
-        race = rating.race
+    for i, rating in enumerate(glicko_ratings):
         previous_rating = glicko_ratings[i-1].rating if i > 0 else 1500
-        data.append([rating.race_date, rating.rating])
+        data.append([rating.race.date, rating.rating])
         change = rating.rating - previous_rating
         change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-        tooltip_data[rating.school_name][rating.race_date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(datetime.datetime.fromtimestamp(rating.race_date/1000.0).strftime("%b %d, %Y"), rating.opponent_name, rating.race_score, rating.opponent_score, change)
-        if i == len(glicko_ratings)-1 or rating.school_name != glicko_ratings[i+1].school_name:
-            chart_data.append({'name': rating.school_name, 'data': data})
+        tooltip_data[rating.school.name][rating.race.date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(datetime.datetime.fromtimestamp(rating.race.date/1000.0).strftime("%b %d, %Y"), rating.race.opponent.name, rating.race.school_score, rating.race.opponent_score, change)
+        if i == len(glicko_ratings)-1 or rating.school.name != glicko_ratings[i+1].school.name:
+            chart_data.append({'name': rating.school.name, 'data': data})
             data = []
     return chart_data, tooltip_data
 
 
-#chart_data()
+print(chart_data())

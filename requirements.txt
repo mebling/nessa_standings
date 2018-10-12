@@ -4,3 +4,4 @@ tqdm==4.23.4
 Flask_Cors==3.0.6
 lxml==4.1.1
 python_dateutil==2.7.3
+gunicorn==19.9.0

@@ -1,64 +1,53 @@
 from glicko import Glicko, WIN, LOSS
-from models import School, Race, GlickoRating, db
+from models import School, Race, db
 from collections import defaultdict
 from tqdm import tqdm
 from datetime import datetime
 from copy import copy
+from elote import LambdaArena, GlickoCompetitor
+import json
+import random
+from functools import lru_cache
 
 
-def create_ratings():
-    scores = defaultdict(Glicko)
-    races = db.session.query(Race).filter_by(cached=False).order_by(Race.date)
-    for race in races:
-        school = race.school
-        opponent = race.opponent
-        opponent_rating = scores[opponent.name]
-
-        # rate the school
-        series = [[WIN, opponent_rating.rating]] * race.school_score
-        series.extend([[LOSS, opponent_rating.rating]] * race.opponent_score)
-        scores[school.name].rate(series)
-
-        # rate the opponent
-        opponent_series = [[LOSS, scores[school.name].rating]] * race.school_score
-        opponent_series.extend([[WIN, scores[school.name].rating]] * race.opponent_score)
-        scores[opponent.name].rate(opponent_series)
-
-        # insert into the database
-        rating = GlickoRating(race_id=race.id, school_id=school.id, rating=scores[school.name].rating.mu)
-        db.session.add(rating)
-        race.cached = True
-        db.session.add(race)
-        db.session.commit()
-    return scores
+DRAW = None
+WIN = True
+LOSS = False
 
 
-# TODO need to list by school
-# values I need are race_data, opponent_name, school_name, rating
+def matchup(school_a, school_b):
+    return True
+
+
+def ratings(date=None):
+    data = {}
+    dates = db.session.query(Race.date).order_by(Race.date).distinct().all()
+    saved_state = None
+    for date in tqdm(dates):
+        races = db.session.query(Race).filter_by(date=date)
+        matchups = []
+        for race in races:
+            for i in range(race.school_score):
+                matchups.append([race.school_id, race.opponent_id])
+            for i in range(race.opponent_score):
+                matchups.append([race.opponent_id, race.school_id])
+        arena = LambdaArena(matchup, base_competitor=GlickoCompetitor, initial_state=saved_state)
+        arena.tournament(matchups)
+        data[date.date] = arena.export_state()
+    return data
+
+
 def chart_data():
-    OpponentSchool = db.aliased(School)
-    chart_data = []
     tooltip_data = defaultdict(dict)
-
-    glicko_ratings = (db.session
-                        .query(GlickoRating.rating, Race.date, OpponentSchool.name, School.name, Race.school_score, Race.opponent_score)
-                        .join(Race, Race.id == GlickoRating.race_id)
-                        .join(School, School.id == Race.school_id)
-                        .join(OpponentSchool, OpponentSchool.id==Race.opponent_id)
-                        .order_by(GlickoRating.school_id, Race.date))
-    count = glicko_ratings.count()
-    data = []
-    previous_rating = 1500
-    previous_school = None
-    for i, (rating, race_date, opponent_name, school_name, school_score, opponent_score) in enumerate(glicko_ratings):
-        millisecond_race_date = datetime.combine(race_date, datetime.min.time()).timestamp()
-        data.append([millisecond_race_date, rating])
-        change = rating - previous_rating
-        change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-        tooltip_data[school_name][millisecond_race_date] = "<b>{}</b><br/>{}<br/>{}-{} ({})".format(race_date.strftime("%b %d, %Y"), opponent_name, school_score, opponent_score, change)
-        if i == count-1 or school_name != previous_school:
-            chart_data.append({'name': school_name, 'data': data})
-            data = []
-        previous_rating = rating
-        previous_school = school_name
+    schools = dict(db.session.query(School.id, School.name).all())
+    all_data = defaultdict(list)
+    for date, data in ratings().items():
+        for school_id, values in data.items():
+            millisecond_race_date = int(datetime.combine(date, datetime.min.time()).timestamp())
+            previous_rating = 1500 if len(all_data[school_id]) == 0 else all_data[school_id][-1][1]
+            change = values['initial_rating'] - previous_rating
+            change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
+            tooltip_data[schools[school_id]][millisecond_race_date] = "<b>{}</b><br/>{}".format(date.strftime("%b %d, %Y"), change)
+            all_data[school_id].append([millisecond_race_date, values['initial_rating']])
+    chart_data = [{ 'name': schools[school_id], 'data': data } for school_id, data in all_data.items()]
     return chart_data, tooltip_data

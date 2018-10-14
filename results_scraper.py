@@ -27,7 +27,13 @@ class ResultsScraper(BaseScraper):
         Race.find_or_create(school_id=self._school.id, opponent_id=opponent_school.id, date=date, school_score=school_score, opponent_score=opponent_score)
 
     def scrape(self):
-        tr_elements = self._doc.xpath('//tr')
+        while True:
+            try:
+                tr_elements = self._doc.xpath('//tr')
+                break
+            except:
+                time.sleep(1)
+
         columns = [t.text_content() for t in tr_elements[0]]
         for elem in tr_elements[1:]:
             match = {}

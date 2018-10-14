@@ -34,7 +34,6 @@ class Race(db.Model):
     date = db.Column(db.Date, nullable=False, index=True)
     school_score = db.Column(db.Integer, nullable=False)
     opponent_score = db.Column(db.Integer, nullable=False)
-    cached = db.Column(db.Boolean, default=False)
 
     school = relationship("School", foreign_keys=[school_id])
     opponent = relationship("School", foreign_keys=[opponent_id])
@@ -42,6 +41,10 @@ class Race(db.Model):
     @classmethod
     def find_or_create(cls, **kargs):
         existing = cls.query.filter_by(**kargs).first()
+        new_args = copy(kargs)
+        new_args['school_id'] = kargs['opponent_id']
+        new_args['opponent_id'] = kargs['school_id']
+        existing = existing or cls.query.filter_by(**new_args).first()
         if existing:
             return existing
         else:
@@ -49,16 +52,3 @@ class Race(db.Model):
             db.session.add(new)
             db.session.commit()
             return new
-
-
-class GlickoRating(db.Model):
-    __tablename__ = 'glicko_ratings'
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
-    race_id = db.Column('races', db.Integer, db.ForeignKey("races.id"), nullable=False)
-    rating = db.Column(db.Float(), nullable=False)
-
-    school = relationship("School")
-    race = relationship("Race")

@@ -1,5 +1,4 @@
 from scraper import Scraper
-from school_scraper import SchoolScraper
 import datetime
 from app import app
 

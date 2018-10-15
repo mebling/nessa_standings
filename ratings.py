@@ -58,7 +58,7 @@ def rating_on(school, date):
 
 def matchups_for(school_id):
     races = db.session.query(Race).filter((Race.school_id == school_id) | (Race.opponent_id == school_id)).order_by(Race.date).all()
-    dates = sorted(arena().ratings.keys())
+    dates = sorted(arena().ratings.keys(), reverse=True)
     ratings = [arena().ratings[date][school_id] for date in dates]
     matchups = defaultdict(list)
     for race in races:

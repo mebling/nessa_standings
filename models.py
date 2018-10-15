@@ -27,7 +27,7 @@ class School(db.Model):
     @classmethod
     def find_or_create(cls, name):
         name = NAME_MAPPINGS.get(name, name)
-        existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
+        existing = cls.query.filter_by(name=name).first()
         if existing:
             return existing
         else:
@@ -41,15 +41,15 @@ class Season(db.Model):
     __tablename__ = 'seasons'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False, index=True)
+    year = db.Column(db.Integer, nullable=False, index=True)
 
     @classmethod
-    def find_or_create(cls, name):
-        existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
+    def find_or_create(cls, year):
+        existing = cls.query.filter_by(year=year).first()
         if existing:
             return existing
         else:
-            new = cls(name=name)
+            new = cls(year=year)
             db.session.add(new)
             db.session.commit()
             return new
@@ -69,7 +69,7 @@ class Race(db.Model):
 
     school = relationship("School", foreign_keys=[school_id])
     opponent = relationship("School", foreign_keys=[opponent_id])
-    season = relationship("Season", foreign_keys=[season_id])
+    #season = relationship("Season", foreign_keys=[season_id])
 
     @classmethod
     def find_or_create(cls, **kargs):

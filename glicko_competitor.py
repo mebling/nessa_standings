@@ -17,8 +17,8 @@ class GlickoCompetitor(BaseCompetitor):
             "initial_rd": self.rd
         }
 
-    def transform_rd(self):
-        self.rd = min([350, math.sqrt(self.rd ** 2 + self._c ** 2)])
+    def transform_rd(self, min_rd):
+        self.rd = min([min_rd, math.sqrt(self.rd ** 2 + self._c ** 2)])
 
     @property
     def _g(self):
@@ -28,8 +28,8 @@ class GlickoCompetitor(BaseCompetitor):
         exponent = (-1 * competitor._g * (self.rating - competitor.rating)) / 400.
         return 1 / (1 + 10 ** exponent)
 
-    def raced(self, races):
-        self.transform_rd()
+    def raced(self, races, min_rd=350):
+        self.transform_rd(min_rd)
         if len(races) == 0:
             return
         d2_sum = 0

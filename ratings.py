@@ -26,6 +26,7 @@ def matchup(school_a, school_b):
     return True
 
 
+@lru_cache()
 def ratings(date=None):
     data = {}
     dates = db.session.query(Race.date).order_by(Race.date).distinct().all()
@@ -51,13 +52,14 @@ def ratings(date=None):
                 outcomes.append(False)
         arena.tournament(matchups, outcomes)
         data[race_date] = arena.export_state()
-    return data
+    return arena, data
 
 
+@lru_cache()
 def chart_data():
     schools = dict(db.session.query(School.id, School.name).all())
     all_data = defaultdict(list)
-    for race_date, data in ratings().items():
+    for race_date, data in ratings()[1].items():
         for school_id, values in data.items():
             previous_rating = 1500 if len(all_data[school_id]) == 0 else all_data[school_id][-1][1]
             change = values['initial_rating'] - previous_rating
@@ -65,3 +67,8 @@ def chart_data():
             all_data[school_id].append([race_date.strftime('%m-%d-%Y'), values['initial_rating']])
     chart_data = [{ 'name': schools[school_id], 'data': data } for school_id, data in all_data.items()]
     return chart_data
+
+
+def rating_for(school):
+    arena, _ = ratings()
+    return arena.competitors[school.id].rating

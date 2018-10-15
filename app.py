@@ -5,7 +5,7 @@ from flask import jsonify
 import datetime
 from flask_migrate import Migrate
 from models import db, School
-from ratings import chart_data
+from ratings import chart_data, rating_for
 import os
 
 
@@ -21,7 +21,8 @@ db.init_app(app)
 @app.route('/', methods=['GET'])
 def index():
     schools = db.session.query(School).order_by(School.name).all()
-    schools = [[school.name, school.id] for school in schools]
+    schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
+    schools = sorted(schools, key=lambda k: k['rating'])
     return render_template("index.html", schools=schools)
 
 

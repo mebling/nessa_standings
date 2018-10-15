@@ -25,6 +25,14 @@ class ResultsScraper(BaseScraper):
         date = parser.parse(match['Date'])
         opponent_name = match['Opponent'].replace('At ', '')
         opponent_school = School.find_or_create(name=opponent_name)
+        status = match['Result']
+        score_a, score_b = results
+        if status == "Win":
+            school_score = max(score_a, score_b)
+            opponent_score = min(score_a, score_b)
+        else:
+            opponent_score = max(score_a, score_b)
+            school_score = min(score_a, score_b)
         Race.find_or_create(season_id=self.season.id, school_id=self._school.id, opponent_id=opponent_school.id, date=date, school_score=school_score, opponent_score=opponent_score)
 
     def scrape(self):

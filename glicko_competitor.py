@@ -11,12 +11,6 @@ class GlickoCompetitor(BaseCompetitor):
         self.rating = initial_rating
         self.rd = initial_rd
 
-    def __repr__(self):
-        return '<GlickoCompetitor: %s>' % (self.__hash__())
-
-    def __str__(self):
-        return '<GlickoCompetitor>'
-
     def export_state(self):
         return {
             "initial_rating": self.rating,

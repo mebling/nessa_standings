@@ -67,8 +67,9 @@ def matchups_for(school_id):
     data = []
     for date in race_dates:
         races = matchups[date]
-        previous_rating = ratings[dates.index(date) + 1] if dates.index(date) != (len(dates) - 1) else 1500
-        new_rating = ratings[dates.index(race.date)]
+        index = dates.index(date)
+        previous_rating = ratings[index + 1] if index < len(dates) else 1500
+        new_rating = ratings[index]
         descriptions = []
         for race in races:
             if race.school_id == school_id:

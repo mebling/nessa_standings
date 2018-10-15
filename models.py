@@ -53,6 +53,12 @@ class Race(db.Model):
     @classmethod
     def find_or_create(cls, **kargs):
         existing = cls.query.filter_by(**kargs).first()
+        new_args = copy(kargs)
+        new_args['school_id'] = kargs['opponent_id']
+        new_args['opponent_id'] = kargs['school_id']
+        new_args['school_score'] = kargs['opponent_score']
+        new_args['opponent_score'] = kargs['school_score']
+        existing = existing or cls.query.filter_by(**new_args).first()
         if existing:
             return existing
         else:

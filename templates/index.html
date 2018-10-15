@@ -2,6 +2,7 @@
 {% for school in schools %}
 <tr>
    <td class="school_name"><a href="/schools/{{school['id']}}">{{school['name']}}</a></td>
+   <td class="school_name"><a href="/matchups/{{school['id']}}">See Matchups</a></td>
    <TD class="rating">{{school['rating']|round(2)}}</TD>
 </tr>
 {% endfor %}

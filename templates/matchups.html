@@ -1,0 +1,18 @@
+<table>
+<tr>
+  <th>Date</th>
+  <th>Description</th>
+  <th>Previous Rating</th>
+  <th>New Rating</th>
+  <th>Impact</th>
+</tr>
+{% for matchup in matchups %}
+<tr>
+   <td class="date">{{ matchup['date'] }}</td>
+   <td class="description">{{ matchup['description'] }}</td>
+   <td class="previous_rating">{{ matchup['previous_rating']|round(2)}}</td>
+   <td class="new_rating">{{ matchup['rating']|round(2)}}</td>
+   <td class="impact">{{ (matchup['rating'] - matchup['previous_rating'])|round(2)}}</td>
+</tr>
+{% endfor %}
+</table>

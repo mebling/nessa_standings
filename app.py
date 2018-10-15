@@ -5,7 +5,7 @@ from flask import jsonify
 import datetime
 from flask_migrate import Migrate
 from models import db, School
-from ratings import chart_data, rating_for
+from ratings import chart_data, rating_for, matchups_for
 import os
 
 
@@ -24,6 +24,11 @@ def index():
     schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
     schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
     return render_template("index.html", schools=schools)
+
+
+@app.route("/matchups/<school_id>", methods=["GET"])
+def matchups(school_id):
+    return render_template("matchups.html", matchups=matchups_for(int(school_id)))
 
 
 @app.route("/schools/<school_id>", methods=["GET"])

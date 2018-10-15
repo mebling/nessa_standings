@@ -29,7 +29,7 @@ class GlickoCompetitor(BaseCompetitor):
 
     @property
     def _g(self):
-        return 1 / (math.sqrt(1 + 3 * cls._q ** 2 * self.rd ** 2 / math.pi ** 2))
+        return (math.sqrt(1 + 3 * (self._q ** 2) * self.rd ** 2 / math.pi ** 2))
 
     def expected_score(self, competitor):
         exponent = (-1 * competitor._g * (self.rating - competitor.rating)) / 400.
@@ -41,11 +41,11 @@ class GlickoCompetitor(BaseCompetitor):
         for (competitor, outcome) in races:
             s = 1 if outcome else 0
             E_term = self.expected_score(competitor)
-            d2_sum += competitor._g ** 2 * E_term * (1 - E_term)
-            r_sum += competitor._g) * (s - E_term)
-        d_squared = (self._q ** 2 * d2_sum) ** -1
-        new_r = (self.rating + (self._q / (1 / self.rd ** 2 + 1 / d_squared))) * r_sum
-        new_rd = math.sqrt(((1 / self.rd ** 2) + (1 / d_squared)) ** -1)
+            d2_sum += (E_term * (1 - E_term) * (self._q ** 2) * (competitor._g ** 2))
+            r_sum += competitor._g * (s - E_term)
+        denom = self.rd ** -2 + d2_sum
+        new_r = self.rating + self._q / denom * d2_sum
+        new_rd = math.sqrt(1. / denom)
 
         # assign new rating and rd
         self.rating = new_r

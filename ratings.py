@@ -30,10 +30,10 @@ def ratings(date=None):
         outcomes = []
         for race in races:
             for i in range(race.school_score):
-                matchups.append([race.school_id, race.opponent_score])
+                matchups.append([race.school_id, race.opponent_id])
                 outcomes.append(True)
             for i in range(race.opponent_score):
-                matchups.append([race.school_id, race.opponent_score])
+                matchups.append([race.school_id, race.opponent_id])
                 outcomes.append(False)
         arena = GlickoArena(matchup, base_competitor=GlickoCompetitor, initial_state=saved_state)
         arena.tournament(matchups, outcomes)

@@ -16,18 +16,9 @@
     }
   }
 
-  Highcharts.chart('container', {
+  Highcharts.stockChart('container', {
       title: {
           text: 'Glicko NESSA Rating'
-      },
-      xAxis: {
-          title: {
-              text: 'Date'
-          },
-          type: 'datetime',
-          labels: {
-            format: '{value:%Y}'
-          }
       },
       yAxis: {
           title: {
@@ -36,7 +27,13 @@
       },
       tooltip: {
           formatter: function() {
-              return tooltip[this.series.name][this.x];
+            var tooltips = [];
+            var point;
+            for (j = 0; j < this.points.length; j++) {
+              point = this.points[j]
+              tooltips.push("<b>" + point.series.name + "<b/><br />" + tooltip[point.series.name][this.x])
+            }
+            return tooltips
           }
       },
       colors: ['#6CF', '#39F', '#06C', '#036', '#000'],

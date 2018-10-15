@@ -50,7 +50,7 @@ def chart_data():
             previous_rating = 1500 if len(all_data[school_id]) == 0 else all_data[school_id][-1][1]
             change = values['initial_rating'] - previous_rating
             change = "+{}".format(str(round(change, 2))) if change >= 0 else str(round(change, 2))
-            tooltip_data[schools[school_id]].append("<b>{}</b><br/>{}".format(date.strftime("%b %d, %Y"), change))
-            all_data[school_id].append([date.strftime('%b %d, %Y'), values['initial_rating']])
+            tooltip_data[schools[school_id]].append("<b>{}</b><br/>{} ({})".format(date.strftime("%b %d, %Y"), round(values['initial_rating'], 2), change))
+            all_data[school_id].append([date.strftime('%m-%d-%Y'), values['initial_rating']])
     chart_data = [{ 'name': schools[school_id], 'data': data } for school_id, data in all_data.items()]
     return chart_data, tooltip_data

@@ -36,20 +36,17 @@ class GlickoCompetitor(BaseCompetitor):
         return 1 / (1 + 10 ** exponent)
 
     def raced(self, races):
-        d_square_inv = 0
+        d2_sum = 0
         difference = 0
         for competitor, outcome in races:
             impact = competitor._g
             expected_score = self.expected_score(competitor)
             actual_score = 1. if outcome else 0.
             difference += impact * (actual_score - expected_score)
-            d_square_inv += (
-                expected_score * (1 - expected_score) *
-                (self._q ** 2) * (impact ** 2))
-        denom = self.rd ** -2 + d_square_inv
-        rating = self.rating + self._q / denom * difference
-        rd = math.sqrt(1. / denom)
+            d2_sum += expected_score * (1 - expected_score) * (impact ** 2)
+        d2 = 1/((self._q ** 2) * d2_sum)
+        denom = self.rd ** -2 + 1/d2
 
         # assign new rating and rd
-        self.rating = rating
-        self.rd = rd
+        self.rating = self.rating + ((self._q / denom) * difference)
+        self.rd = math.sqrt(1/denom)

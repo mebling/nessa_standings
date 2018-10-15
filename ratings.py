@@ -4,7 +4,8 @@ from collections import defaultdict
 from tqdm import tqdm
 from datetime import datetime
 from copy import copy
-from elote import LambdaArena, GlickoCompetitor
+from glicko_competitor import GlickoCompetitor
+from arena import GlickoArena
 import json
 import random
 from functools import lru_cache
@@ -26,13 +27,12 @@ def ratings(date=None):
     for date in tqdm(dates):
         races = db.session.query(Race).filter_by(date=date)
         matchups = []
+        outcomes = []
         for race in races:
-            for i in range(race.school_score):
-                matchups.append([race.school_id, race.opponent_id])
-            for i in range(race.opponent_score):
-                matchups.append([race.opponent_id, race.school_id])
-        arena = LambdaArena(matchup, base_competitor=GlickoCompetitor, initial_state=saved_state)
-        arena.tournament(matchups)
+            matchups.append([race.school_id, race.opponent_id])
+            outcomes.append(race.school_score > race.opponent_score)
+        arena = GlickoArena(matchup, base_competitor=GlickoCompetitor, initial_state=saved_state)
+        arena.tournament(matchups, outcomes)
         data[date.date] = arena.export_state()
     return data
 

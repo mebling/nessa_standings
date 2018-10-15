@@ -9,11 +9,10 @@ from ratings import chart_data
 import os
 
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa"
-
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa"
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 migrate = Migrate(app, db)
 db.init_app(app)
@@ -29,6 +28,6 @@ def index():
 @app.route("/schools/<school_id>", methods=["GET"])
 def schools(school_id):
     school = School.query.filter_by(id=school_id).first()
-    data, tooltip_data = chart_data()
+    data = chart_data()
     data = [d for d in data if d['name'] == school.name]
-    return render_template("chart.html", highchart_json=data, tooltip_json=tooltip_data)
+    return render_template("chart.html", highchart_json=data)

@@ -37,18 +37,39 @@ class School(db.Model):
             return new
 
 
+class Season(db.Model):
+    __tablename__ = 'seasons'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False, index=True)
+
+    @classmethod
+    def find_or_create(cls, name):
+        existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
+        if existing:
+            return existing
+        else:
+            new = cls(name=name)
+            db.session.add(new)
+            db.session.commit()
+            return new
+
+
 class Race(db.Model):
     __tablename__ = 'races'
 
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
     opponent_id = db.Column('opponent_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+    season_id = db.Column('season_id', db.Integer, db.ForeignKey("seasons.id"), nullable=False)
+
     date = db.Column(db.Date, nullable=False, index=True)
     school_score = db.Column(db.Integer, nullable=False)
     opponent_score = db.Column(db.Integer, nullable=False)
 
     school = relationship("School", foreign_keys=[school_id])
     opponent = relationship("School", foreign_keys=[opponent_id])
+    season = relationship("Season", foreign_keys=[season_id])
 
     @classmethod
     def find_or_create(cls, **kargs):

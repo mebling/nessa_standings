@@ -1,6 +1,7 @@
 from results_scraper import ResultsScraper
 from functools import lru_cache
 from base_scraper import BaseScraper
+from models import Season
 
 
 URL = "http://taboracademy.net/nessa/standings.asp"
@@ -36,6 +37,7 @@ class Scraper(BaseScraper):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
         if self.is_valid:
             for link in self._school_links:
-                ResultsScraper(self.url.split("standings.asp")[0], link).scrape()
+                season = Season.find_or_create(str(2000 + self.year or date.today().year))
+                ResultsScraper(season, self.url.split("standings.asp")[0], link).scrape()
             return True
         return False

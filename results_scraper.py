@@ -8,7 +8,8 @@ BASE_URL = "http://taboracademy.net/nessa/"
 
 
 class ResultsScraper(BaseScraper):
-    def __init__(self, url, link):
+    def __init__(self, season, url, link):
+        self.season = season
         self.name = link.text_content()
         self.url = url + link.attrib['href']
 
@@ -24,7 +25,7 @@ class ResultsScraper(BaseScraper):
         date = parser.parse(match['Date'])
         opponent_name = match['Opponent'].replace('At ', '')
         opponent_school = School.find_or_create(name=opponent_name)
-        Race.find_or_create(school_id=self._school.id, opponent_id=opponent_school.id, date=date, school_score=school_score, opponent_score=opponent_score)
+        Race.find_or_create(season_id=self.season.id, school_id=self._school.id, opponent_id=opponent_school.id, date=date, school_score=school_score, opponent_score=opponent_score)
 
     def scrape(self):
         while True:

@@ -9,7 +9,7 @@ from ratings import chart_data
 import os
 
 
-# DATABASE_URL = "postgresql://localhost/nessa"
+#app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/nessa"
 
 app = Flask(__name__)
 CORS(app)
@@ -21,8 +21,9 @@ db.init_app(app)
 
 @app.route('/', methods=['GET'])
 def index():
-    data, tooltip_data = chart_data()
-    return render_template("chart.html", highchart_json=data, tooltip_json=tooltip_data)
+    schools = db.session.query(School).order_by(School.name).all()
+    schools = [[school.name, school.id] for school in schools]
+    return render_template("index.html", schools=schools)
 
 
 @app.route("/schools/<school_id>", methods=["GET"])

@@ -7,12 +7,14 @@ from sqlalchemy.orm import relationship
 db = SQLAlchemy()
 NAME_MAPPINGS = {
   'Bishop Hendricken High School' : 'Bishop Hendricken HS',
+  'Bishop Hendricken  HS': 'Bishop Hendricken HS',
   'Boston Latin School':'Boston Latin High School',
   'Portland HS':'Portland High School',
   "St. Sebastian's Country Day School":"St Sebastian's School",
   'Sturgis East Charter School':'Sturgis Charter School',
   'Swampscott High School':'Swampscott HS',
-  'Valley Regional High School ':'Valley Regional High School'
+  'Valley Regional High School ':'Valley Regional High School',
+  'Valley Regional High School \xa0':'Valley Regional High School'
 }
 
 

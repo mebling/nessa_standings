@@ -8,8 +8,7 @@ START_YEAR = 9
 
 
 def scrape_all():
-    SchoolScraper().scrape()
-    year = START_YEAR
+     year = START_YEAR
     while Scraper(year).scrape():
         year += 1
     Scraper().scrape()

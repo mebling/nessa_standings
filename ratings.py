@@ -63,9 +63,11 @@ def matchups_for(school_id):
     matchups = defaultdict(list)
     for race in races:
         matchups[race.date].append(race)
+    race_dates = sorted(list(set([race.date for race in races])), reverse=True)
     data = []
-    for date, races in matchups.items():
-        previous_rating = ratings[dates.index(race.date) - 1]
+    for date in race_dates:
+        races = matchups[date]
+        previous_rating = ratings[dates.index(date) + 1] if dates.index(date) != (len(dates) - 1) else 1500
         new_rating = ratings[dates.index(race.date)]
         descriptions = []
         for race in races:

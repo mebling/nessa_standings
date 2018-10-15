@@ -7,6 +7,17 @@ from sqlalchemy.orm import relationship
 db = SQLAlchemy()
 
 
+NAME MAPPINGS = {
+    'Bishop Hendricken High School': 'Bishop Hendricken HS',
+    'Boston Latin School': 'Boston Latin High School',
+    'Portland HS': 'Portland High School',
+    "St. Sebastian's Country Day School": "St Sebastian's School",
+    'Sturgis East Charter School': 'Sturgis Charter School',
+    'Swampscott High School': 'Swampscott HS',
+    'Valley Regional High School ': 'Valley Regional High School'
+}
+
+
 class School(db.Model):
     __tablename__ = 'schools'
 
@@ -15,6 +26,7 @@ class School(db.Model):
 
     @classmethod
     def find_or_create(cls, name):
+        name = NAME_MAPPING.get(name, name)
         existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
         if existing:
             return existing

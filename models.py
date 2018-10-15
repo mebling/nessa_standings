@@ -24,7 +24,7 @@ class School(db.Model):
 
     @classmethod
     def find_or_create(cls, name):
-        name = NAME_MAPPING.get(name, name)
+        name = NAME_MAPPINGS.get(name, name)
         existing = cls.query.filter_by(name=name).first() or cls.query.filter_by(name=name).first()
         if existing:
             return existing

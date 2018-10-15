@@ -22,7 +22,7 @@ db.init_app(app)
 def index():
     schools = db.session.query(School).order_by(School.name).all()
     schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
-    schools = sorted(schools, key=lambda k: k['rating'])
+    schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
     return render_template("index.html", schools=schools)
 
 

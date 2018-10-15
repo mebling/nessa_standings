@@ -5,15 +5,28 @@
 <script type="text/javascript">
   var chart_data = {{ highchart_json|tojson|safe }};
   var tooltip = {{ tooltip_json|tojson|safe}};
+  var i;
+  var j;
+  var date;
+  for (i = 0; i < chart_data.length; i++) {
+    for (j = 0; j < chart_data[i].data.length; j++) {
+      date = Date.parse(chart_data[i].data[j][0])
+      chart_data[i].data[j][0] = date
+      tooltip[chart_data[i].name][date] = tooltip[chart_data[i].name][j]
+    }
+  }
 
   Highcharts.chart('container', {
       title: {
           text: 'Glicko NESSA Rating'
       },
       xAxis: {
-          type: 'datetime',
           title: {
               text: 'Date'
+          },
+          type: 'datetime',
+          labels: {
+            format: '{value:%Y}'
           }
       },
       yAxis: {

@@ -29,8 +29,12 @@ def ratings(date=None):
         matchups = []
         outcomes = []
         for race in races:
-            matchups.append([race.school_id, race.opponent_id])
-            outcomes.append(race.school_score > race.opponent_score)
+            for i in range(race.school_score):
+                matchups.append([race.school_id, race.opponent_score])
+                outcomes.append(True)
+            for i in range(race.opponent_score):
+                matchups.append([race.school_id, race.opponent_score])
+                outcomes.append(False)
         arena = GlickoArena(matchup, base_competitor=GlickoCompetitor, initial_state=saved_state)
         arena.tournament(matchups, outcomes)
         data[date.date] = arena.export_state()

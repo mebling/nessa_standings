@@ -57,7 +57,7 @@ def rating_on(school, date):
 
 
 def matchups_for(school_id):
-    races = db.session.query(Race).filter((Race.school_id == school_id) | (Race.opponent_id == school_id)).order_by(Race.date).all()
+    races = db.session.query(Race).filter(Race.school_id == school_id).order_by(Race.date).all()
     dates = sorted(arena().ratings.keys(), reverse=True)
     ratings = [arena().ratings[date][school_id] for date in dates]
     matchups = defaultdict(list)
@@ -69,10 +69,7 @@ def matchups_for(school_id):
         new_rating = ratings[dates.index(race.date)]
         descriptions = []
         for race in races:
-            if race.school_id == school_id:
-                descriptions.append("{} ({}): {}-{}".format(race.opponent.name, round(rating_on(race.opponent, date), 2), race.school_score, race.opponent_score))
-            else:
-                descriptions.append("{} ({}): {}-{}".format(race.school.name, round(rating_on(race.school, date) ,2), race.opponent_score, race.school_score))
+            descriptions.append("{} ({}): {}-{}".format(race.opponent.name, round(rating_on(race.opponent, date), 2), race.school_score, race.opponent_score))
         description = ", ".join(descriptions)
         data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': new_rating, 'description': description})
     return data

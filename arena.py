@@ -21,7 +21,6 @@ class GlickoArena():
         grouped = defaultdict(list)
         for (a, b), outcome in zip(matchups, outcomes):
             grouped[self.competitors[a]].append([self.competitors[b], outcome])
-            grouped[self.competitors[b]].append([self.competitors[a], not outcome])
         for competitor_name, competitor in self.competitors.items():
             competitor.raced(grouped[competitor])
             self.ratings[date][competitor_name] = competitor.rating

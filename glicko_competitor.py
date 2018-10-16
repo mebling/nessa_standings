@@ -10,6 +10,8 @@ class GlickoCompetitor(BaseCompetitor):
     def __init__(self, initial_rating=1500, initial_rd=350):
         self.rating = initial_rating
         self.rd = initial_rd
+        self.rating_period_rating = initial_rating
+        self.rating_period_rd = initial_rd
 
     def export_state(self):
         return {
@@ -18,7 +20,7 @@ class GlickoCompetitor(BaseCompetitor):
         }
 
     def transform_rd(self, min_rd):
-        self.rd = min([min_rd, math.sqrt(self.rd ** 2 + self._c ** 2)])
+        self.rating_period_rd = min([min_rd, math.sqrt(self.rd ** 2 + self._c ** 2)])
 
     @property
     def _g(self):
@@ -37,12 +39,24 @@ class GlickoCompetitor(BaseCompetitor):
         for competitor, outcome in races:
             impact = competitor._g
             expected_score = self.expected_score(competitor)
-            actual_score = 1. if outcome else 0.
+            if outcome:
+                actual_score = 1.
+            elif outcome == None:
+                actual_score = .5
+            else:
+                actual_score = 0
             difference += impact * (actual_score - expected_score)
             d2_sum += expected_score * (1 - expected_score) * (impact ** 2)
-        d2 = 1/((self._q ** 2) * d2_sum)
-        denom = self.rd ** -2 + 1/d2
+        if d2_sum == 0:
+            return
+        else:
+            d2 = 1/((self._q ** 2) * d2_sum)
+            denom = self.rd ** -2 + 1/d2
 
-        # assign new rating and rd
-        self.rating = self.rating + ((self._q / denom) * difference)
-        self.rd = math.sqrt(1/denom)
+            # assign new rating and rd
+            self.rating_period_rating = self.rating + ((self._q / denom) * difference)
+            self.rating_period_pd = math.sqrt(1/denom)
+
+    def update(self):
+        self.rating = self.rating_period_rating
+        self.rating_period_rd = self.rating_period_rd

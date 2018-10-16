@@ -29,22 +29,25 @@ def arena(date=None):
         matchups = []
         outcomes = []
         for race in races:
-            for i in range(race.school_score):
-                matchups.append([race.school_id, race.opponent_id])
-                outcomes.append(True)
-            for i in range(race.opponent_score):
-                matchups.append([race.school_id, race.opponent_id])
-                outcomes.append(False)
+            matchups.append([race.school_id, race.opponent_id])
+            if race.school_score > race.opponent_score:
+                outcome = True
+            elif race.opponent_score < race.school_score:
+                outcome = False
+            else:
+                outcome = None
+            outcomes.append(outcome)
         arena.tournament(race_date, matchups, outcomes)
     return arena
 
 
 def chart_data():
-    schools = dict(db.session.query(School.id, School.name).all())
+    schools = db.session.query(School).all()
     chart_data = []
-    for school_id in arena().competitors.keys():
-        data = [[date.strftime("%b-%d-%Y"), arena().ratings[date][school_id]] for date in sorted(arena().ratings.keys())]
-        chart_data.append({ 'name': schools[school_id], 'data': data })
+    for school in schools:
+        print(arena().dates)
+        data = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().ratings_for(school.id))]
+        chart_data.append({ 'name': school.name, 'data': data })
     return chart_data
 
 
@@ -52,30 +55,31 @@ def rating_for(school):
     return arena().competitors[school.id].rating
 
 
-def rating_on(school, date):
-    return arena().ratings[date][school.id]
+def rating_on(school_id, date):
+    return arena().rating_on(date, school_id)
 
 
 def matchups_for(school_id):
-    races = db.session.query(Race).filter((Race.school_id == school_id) | (Race.opponent_id == school_id)).order_by(Race.date).all()
-    dates = sorted(arena().ratings.keys(), reverse=True)
-    ratings = [arena().ratings[date][school_id] for date in dates]
+    races = db.session.query(Race).filter((Race.school_id == school_id) | (Race.opponent_id == school_id)).order_by(Race.date.desc()).all()
     matchups = defaultdict(list)
     for race in races:
         matchups[race.date].append(race)
-    race_dates = sorted(list(set([race.date for race in races])), reverse=True)
     data = []
-    for date in race_dates:
+    dates = arena().dates
+    dates.reverse()
+    ratings = arena().ratings_for(school_id)
+    ratings.reverse()
+    for i, (date, rating) in enumerate(zip(dates, ratings)):
         races = matchups[date]
-        index = dates.index(date)
-        previous_rating = ratings[index + 1] if index < len(dates) else 1500
-        new_rating = ratings[index]
+        if len(races) == 0:
+            continue
+        previous_rating = ratings[i + 1] if i < len(dates) else 1500
         descriptions = []
         for race in races:
             if race.school_id == school_id:
-                descriptions.append("{} ({}): {}-{}".format(race.opponent.name, round(rating_on(race.opponent, date), 2), race.school_score, race.opponent_score))
+                descriptions.append("{} ({}): {}-{}".format(race.opponent.name, round(rating_on(race.opponent_id, date), 2), race.school_score, race.opponent_score))
             else:
-                descriptions.append("{} ({}): {}-{}".format(race.school.name, round(rating_on(race.school, date) ,2), race.opponent_score, race.school_score))
+                descriptions.append("{} ({}): {}-{}".format(race.school.name, round(rating_on(race.school_id, date) ,2), race.opponent_score, race.school_score))
         description = ", ".join(descriptions)
-        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': new_rating, 'description': description})
+        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating, 'description': description})
     return data

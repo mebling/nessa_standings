@@ -48,4 +48,4 @@ class GlickoCompetitor(BaseCompetitor):
 
     def update(self):
         self.rating = self.rating_period_rating
-        self.rating_period_rd = self.rating_period_rd
+        self.rd = self.rating_period_rd

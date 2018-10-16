@@ -8,7 +8,7 @@ class Match:
 
     @property
     def outcome(self):
-        if self.a_score < self.b_score:
+        if self.a_score > self.b_score:
             return True
         elif self.b_score > self.a_score:
             return False

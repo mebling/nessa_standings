@@ -10,7 +10,7 @@ class GlickoArena():
             for k, v in initial_state.items():
                 self.competitors[k] = GlickoCompetitor(**v)
         self._add_competitors(competitors)
-        self.rating_periods = []
+        self.rating_periods = {}
 
     def _add_competitors(self, names):
         for name in names:
@@ -20,15 +20,14 @@ class GlickoArena():
     def tournament(self, date, matchups, outcomes):
         rating_period = RatingPeriod(self, date, matchups, outcomes)
         rating_period.run()
-        self.rating_periods.append(rating_period)
+        self.rating_periods[date] = rating_period
 
     @property
     def dates(self):
-        return [rating_period.date for rating_period in self.rating_periods]
+        return sorted([rating_period.date for rating_period in self.rating_periods.values()])
 
     def ratings_for(self, competitor_name):
-        return [rating_period.rating_for(competitor_name) for rating_period in self.rating_periods]
+        return [self.rating_periods[date].rating_for(competitor_name) for date in self.dates]
 
     def rating_on(self, date, competitor_name):
-        rating_period = [rating_period for rating_period in self.rating_periods if rating_period.date == date][0]
-        return rating_period.rating_for(competitor_name)
+        return self.rating_periods[date].rating_for(competitor_name)

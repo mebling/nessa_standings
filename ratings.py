@@ -39,7 +39,7 @@ def matchups_for(school_id):
         races = matchups[date]
         if len(races) == 0:
             continue
-        previous_rating = ratings[i + 1] if i < len(dates) else 1500
+        previous_rating = ratings[i + 1] if i + 1 < len(dates) else 1500
         descriptions = []
         for race in races:
             if race.school_id == school_id:

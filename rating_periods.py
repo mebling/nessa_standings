@@ -32,5 +32,8 @@ class RatingPeriods:
     def ratings_for(self, competitor):
         return [self.rating_periods[date].rating_for(competitor) for date in self.dates]
 
+    def rds_for(self, competitor):
+        return [self.rating_periods[date].rd_for(competitor) for date in self.dates]
+
     def rating_on(self, date, competitor):
         return self.rating_periods[date].rating_for(competitor)

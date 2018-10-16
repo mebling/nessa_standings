@@ -35,7 +35,9 @@ def matchups_for(school_id):
     dates.reverse()
     ratings = arena().ratings_for(school_id)
     ratings.reverse()
-    for i, (date, rating) in enumerate(zip(dates, ratings)):
+    rds = arena().rds_for(school_id)
+    rds.reverse()
+    for i, (date, rating, rd) in enumerate(zip(dates, ratings, rds)):
         races = matchups[date]
         if len(races) == 0:
             continue
@@ -47,5 +49,5 @@ def matchups_for(school_id):
             else:
                 descriptions.append("{} ({}): {}-{}".format(race.school.name, round(rating_on(race.school_id, date) ,2), race.opponent_score, race.school_score))
         description = ", ".join(descriptions)
-        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating, 'description': description})
+        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating, 'description': description, 'rd': rd })
     return data

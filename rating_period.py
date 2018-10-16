@@ -1,31 +1,28 @@
-from collections import defaultdict
+from glicko_rating import GlickoRating
 
 
 class RatingPeriod:
-    def __init__(self, arena, date, matchups, outcomes):
-        self.arena = arena
-        self.matchups = matchups
-        self.outcomes = outcomes
-        self.date = date
-        self.rds = {}
-        self.ratings = {}
+    def __init__(self, competitors, matches, previous_rating_period=None):
+        self.matches = matches
+        self.previous_rating_period = previous_rating_period
+        self.glicko_ratings = {}
+        self._set_glicko_ratings(competitors)
 
-    def commit(self):
-        for competitor_id, competitor in self.arena.competitors.items():
-            competitor.update()
-            self.rds[competitor_id] = competitor.rd
-            self.ratings[competitor_id] = competitor.rating
+    def _set_glicko_ratings(self, competitors):
+        previous = {}
+        for c in competitors:
+            if self.previous_rating_period:
+                previous[c] = self.previous_rating_period.glicko_rating_for(c)
+            else:
+                previous[c] = GlickoRating()
+        for match in self.matches:
+            a_glicko = previous[match.competitor_a]
+            previous[match.competitor_a].compete(previous[match.competitor_b], match.outcome)
+        for c in competitors:
+            self.glicko_ratings[c] = previous[c].end_glicko_rating
 
-    def rating_for(self, competitor_id):
-        return self.ratings[competitor_id]
+    def glicko_rating_for(self, competitor):
+        return self.glicko_ratings[competitor]
 
-    def run(self):
-        grouped = defaultdict(list)
-        for (a, b), outcome in zip(self.matchups, self.outcomes):
-            grouped[self.arena.competitors[a]].append([self.arena.competitors[b], outcome])
-            grouped[self.arena.competitors[b]].append([self.arena.competitors[a], not outcome])
-        for competitor_name, competitor in self.arena.competitors.items():
-            competitor.transform_rd(min_rd=350)
-        for competitor_name, competitor in self.arena.competitors.items():
-            competitor.raced(grouped[competitor])
-        self.commit()
+    def rating_for(self, competitor):
+        return self.glicko_rating_for(competitor).rating

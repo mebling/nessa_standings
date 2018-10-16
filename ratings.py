@@ -1,58 +1,24 @@
-from glicko import Glicko, WIN, LOSS
 from models import School, Race, db
 from collections import defaultdict
-from tqdm import tqdm
-from datetime import datetime, timedelta
-from datetime import date as python_date
-from copy import copy
-from arena import GlickoArena
-import json
-import random
+from arena import Arena
 from functools import lru_cache
-
-
-def date_range(start_date, end_date):
-    for n in range(int ((end_date - start_date).days)):
-        yield start_date + timedelta(n)
 
 
 @lru_cache()
 def arena(date=None):
-    data = {}
-    dates = [d.date for d in db.session.query(Race.date).order_by(Race.date).distinct().all()]
-    arena = GlickoArena([school.id for school in db.session.query(School.id).all()])
-    for race_date in tqdm(date_range(dates[0], python_date.today())):
-        if race_date in dates:
-            races = db.session.query(Race).filter_by(date=race_date)
-        else:
-            races = []
-        matchups = []
-        outcomes = []
-        for race in races:
-            matchups.append([race.school_id, race.opponent_id])
-            if race.school_score > race.opponent_score:
-                outcome = True
-            elif race.opponent_score < race.school_score:
-                outcome = False
-            else:
-                outcome = None
-            outcomes.append(outcome)
-        arena.tournament(race_date, matchups, outcomes)
-    return arena
+    races = db.session.query(Race).all()
+    matchups = [[race.date, race.school_id, race.opponent_id, race.school_score, race.opponent_score] for race in races]
+    return Arena(matchups)
 
 
-def chart_data():
-    schools = db.session.query(School).all()
-    chart_data = []
-    for school in schools:
-        print(arena().dates)
-        data = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().ratings_for(school.id))]
-        chart_data.append({ 'name': school.name, 'data': data })
-    return chart_data
+def chart_data(school_id):
+    school = db.session.query(School).filter_by(id=school_id).first()
+    data = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().ratings_for(school_id))]
+    return [{ 'name': school.name, 'data': data }]
 
 
 def rating_for(school):
-    return arena().competitors[school.id].rating
+    return arena().rating_for(school.id)
 
 
 def rating_on(school_id, date):

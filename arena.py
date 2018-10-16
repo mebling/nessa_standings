@@ -1,33 +1,20 @@
-from collections import defaultdict
-from glicko_competitor import GlickoCompetitor
-from rating_period import RatingPeriod
+from rating_periods import RatingPeriods
+from match import Match
 
 
-class GlickoArena():
-    def __init__(self, competitors, initial_state=None):
-        self.competitors = dict()
-        if initial_state is not None:
-            for k, v in initial_state.items():
-                self.competitors[k] = GlickoCompetitor(**v)
-        self._add_competitors(competitors)
-        self.rating_periods = {}
+class Arena:
+    def __init__(self, matchups):
+        self.rating_periods = RatingPeriods([Match(*m) for m in matchups])
 
-    def _add_competitors(self, names):
-        for name in names:
-            if name not in self.competitors:
-                self.competitors[name] = GlickoCompetitor()
+    def ratings_for(self, competitor):
+        return self.rating_periods.ratings_for(competitor)
 
-    def tournament(self, date, matchups, outcomes):
-        rating_period = RatingPeriod(self, date, matchups, outcomes)
-        rating_period.run()
-        self.rating_periods[date] = rating_period
+    def rating_for(self, competitor):
+        return self.ratings_for(competitor)[-1]
 
     @property
     def dates(self):
-        return sorted([rating_period.date for rating_period in self.rating_periods.values()])
+        return self.rating_periods.dates
 
-    def ratings_for(self, competitor_name):
-        return [self.rating_periods[date].rating_for(competitor_name) for date in self.dates]
-
-    def rating_on(self, date, competitor_name):
-        return self.rating_periods[date].rating_for(competitor_name)
+    def rating_on(self, date, competitor):
+        return self.rating_periods.rating_on(date, competitor)

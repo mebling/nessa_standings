@@ -33,7 +33,5 @@ def matchups(school_id):
 
 @app.route("/schools/<school_id>", methods=["GET"])
 def schools(school_id):
-    school = School.query.filter_by(id=school_id).first()
-    data = chart_data()
-    data = [d for d in data if d['name'] == school.name]
+    data = chart_data(int(school_id))
     return render_template("chart.html", highchart_json=data)

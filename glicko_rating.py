@@ -2,7 +2,7 @@ import math
 
 
 class GlickoRating:
-    C = 1
+    C = 30
     Q = 0.0057565
 
     def __init__(self, rating=1500, rd=350):

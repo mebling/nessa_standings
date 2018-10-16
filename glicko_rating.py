@@ -9,6 +9,7 @@ class GlickoRating:
         self.rating = rating
         self.rd = self._transformed_rd(rd)
         self.matches = {}
+        self._end_glicko_rating = None
 
     def _transformed_rd(self, rd):
         return min([350, math.sqrt(rd ** 2 + self.C ** 2)])
@@ -27,17 +28,19 @@ class GlickoRating:
 
     @property
     def end_glicko_rating(self):
-        if len(self.matches) == 0:
-            return GlickoRating(self.rating, self.rd)
-        d_square_inv = 0
-        difference = 0
-        for glicko_rating, actual_score in self.matches.items():
-            impact = glicko_rating._g
-            expected_score = self._expected_score(glicko_rating)
-            difference += impact * (actual_score - expected_score)
-            d_square_inv += (expected_score * (1 - expected_score) * (self.Q ** 2) * (impact ** 2))
+        if not self._end_glicko_rating:
+            if len(self.matches) == 0:
+                return GlickoRating(self.rating, self.rd)
+            d_square_inv = 0
+            difference = 0
+            for glicko_rating, actual_score in self.matches.items():
+                impact = glicko_rating._g
+                expected_score = self._expected_score(glicko_rating)
+                difference += impact * (actual_score - expected_score)
+                d_square_inv += (expected_score * (1 - expected_score) * (self.Q ** 2) * (impact ** 2))
 
-        denom = self.rd ** -2 + d_square_inv
-        rating = self.rating + self.Q / denom * difference
-        rd = math.sqrt(1. / denom)
-        return GlickoRating(rating, rd)
+            denom = self.rd ** -2 + d_square_inv
+            rating = self.rating + self.Q / denom * difference
+            rd = math.sqrt(1. / denom)
+            self._end_glicko_rating = GlickoRating(rating, rd)
+        return self._end_glicko_rating

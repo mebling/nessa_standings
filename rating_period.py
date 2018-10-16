@@ -21,4 +21,4 @@ class RatingPeriod:
         return self.glicko_ratings[competitor]
 
     def rating_for(self, competitor):
-        return self.glicko_rating_for(competitor).rating
+        return self.glicko_rating_for(competitor).end_glicko_rating.rating

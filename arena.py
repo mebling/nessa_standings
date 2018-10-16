@@ -18,27 +18,17 @@ class GlickoArena():
                 self.competitors[name] = GlickoCompetitor()
 
     def tournament(self, date, matchups, outcomes):
-        rating_period = RatingPeriod(date)
-        grouped = defaultdict(list)
-        for (a, b), outcome in zip(matchups, outcomes):
-            grouped[self.competitors[a]].append([self.competitors[b], outcome])
-            grouped[self.competitors[b]].append([self.competitors[a], not outcome])
-        for competitor_name, competitor in self.competitors.items():
-            competitor.transform_rd(min_rd=350)
-        for competitor_name, competitor in self.competitors.items():
-            competitor.raced(grouped[competitor])
-            rating_period.add(competitor)
-        rating_period.commit()
+        rating_period = RatingPeriod(self, date, matchups, outcomes)
+        rating_period.run()
         self.rating_periods.append(rating_period)
-
 
     @property
     def dates(self):
         return [rating_period.date for rating_period in self.rating_periods]
 
     def ratings_for(self, competitor_name):
-        return [rating_period.rating_for(self.competitors[competitor_name]) for rating_period in self.rating_periods]
+        return [rating_period.rating_for(competitor_name) for rating_period in self.rating_periods]
 
     def rating_on(self, date, competitor_name):
         rating_period = [rating_period for rating_period in self.rating_periods if rating_period.date == date][0]
-        return rating_period.rating_for(self.competitors[competitor_name])
+        return rating_period.rating_for(competitor_name)

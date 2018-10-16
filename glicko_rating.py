@@ -22,9 +22,8 @@ class GlickoRating:
         return 1 / (1 + 10 ** exponent)
 
     def compete(self, glicko_rating, outcome):
-        reversed_outcome = None if outcome == None else not outcome
-        self.matches[glicko_rating] = outcome
-        glicko_rating.matches[self] = reversed_outcome
+        self.matches[glicko_rating] = 1. if outcome else (.5 if outcome == None else 0.)
+        glicko_rating.matches[self] = 0. if outcome else (.5 if outcome == None else 1.)
 
     @property
     def end_glicko_rating(self):
@@ -32,10 +31,9 @@ class GlickoRating:
             return GlickoRating(self.rating, self.rd)
         d_square_inv = 0
         difference = 0
-        for glicko_rating, outcome in self.matches.items():
+        for glicko_rating, actual_score in self.matches.items():
             impact = glicko_rating._g
             expected_score = self._expected_score(glicko_rating)
-            actual_score = 1. if outcome else (.5 if outcome == None else 0.)
             difference += impact * (actual_score - expected_score)
             d_square_inv += (expected_score * (1 - expected_score) * (self.Q ** 2) * (impact ** 2))
 

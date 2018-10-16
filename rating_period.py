@@ -9,17 +9,13 @@ class RatingPeriod:
         self._set_glicko_ratings(competitors)
 
     def _set_glicko_ratings(self, competitors):
-        previous = {}
         for c in competitors:
             if self.previous_rating_period:
-                previous[c] = self.previous_rating_period.glicko_rating_for(c)
+                self.glicko_ratings[c] = self.previous_rating_period.glicko_rating_for(c).end_glicko_rating
             else:
-                previous[c] = GlickoRating()
+                self.glicko_ratings[c] = GlickoRating()
         for match in self.matches:
-            a_glicko = previous[match.competitor_a]
-            previous[match.competitor_a].compete(previous[match.competitor_b], match.outcome)
-        for c in competitors:
-            self.glicko_ratings[c] = previous[c].end_glicko_rating
+            self.glicko_ratings[match.competitor_a].compete(self.glicko_ratings[match.competitor_b], match.outcome)
 
     def glicko_rating_for(self, competitor):
         return self.glicko_ratings[competitor]

@@ -31,16 +31,16 @@ class GlickoRating:
         if not self._end_glicko_rating:
             if len(self.matches) == 0:
                 return GlickoRating(self.rating, self.rd)
-            d_square_inv = 0
+            d2_sum = 0
             difference = 0
             for glicko_rating, actual_score in self.matches.items():
                 impact = glicko_rating._g
                 expected_score = self._expected_score(glicko_rating)
                 difference += impact * (actual_score - expected_score)
-                d_square_inv += (expected_score * (1 - expected_score) * (self.Q ** 2) * (impact ** 2))
-
-            denom = self.rd ** -2 + d_square_inv
+                d2_sum += expected_score * (1 - expected_score) * (impact ** 2)
+            d2 = (self.Q ** 2 * d2_sum) ** -1
+            denom = self.rd ** -2 + d2 ** -1
             rating = self.rating + self.Q / denom * difference
-            rd = math.sqrt(1. / denom)
+            rd = self._transformed_rd(math.sqrt(1. / denom))
             self._end_glicko_rating = GlickoRating(rating, rd)
         return self._end_glicko_rating

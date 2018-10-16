@@ -9,8 +9,8 @@ class Arena:
     def ratings_for(self, competitor):
         return self.rating_periods.ratings_for(competitor)
 
-    def rds_for(self, competitor):
-        return self.rating_periods.rds_for(competitor)
+    def rds_on(self, competitor):
+        return self.rating_periods.rds_on(competitor)
 
     def rating_for(self, competitor):
         return self.ratings_for(competitor)[-1]
@@ -21,3 +21,12 @@ class Arena:
 
     def rating_on(self, date, competitor):
         return self.rating_periods.rating_on(date, competitor)
+
+    def rating_after(self, date, competitor):
+        return self.rating_periods.rating_on(date, competitor)
+
+    def rd_on(self, date, competitor):
+        return self.rating_periods.rd_on(date, competitor)
+
+    def rd_after(self, date, competitor):
+        return self.rating_periods.rd_after(date, competitor)

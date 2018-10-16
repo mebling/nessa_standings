@@ -30,10 +30,19 @@ class RatingPeriods:
         return [min_date + timedelta(n) for n in range(int((date.today() - min_date).days))]
 
     def ratings_for(self, competitor):
-        return [self.rating_periods[date].rating_for(competitor) for date in self.dates]
+        return [self.rating_periods[date].rating_after(competitor) for date in self.dates]
 
-    def rds_for(self, competitor):
-        return [self.rating_periods[date].rd_for(competitor) for date in self.dates]
+    def rds_on(self, competitor):
+        return [self.rating_periods[date].rd_on(competitor) for date in self.dates]
 
     def rating_on(self, date, competitor):
-        return self.rating_periods[date].rating_for(competitor)
+        return self.rating_periods[date].rating_on(competitor)
+
+    def rating_after(self, date, competitor):
+        return self.rating_periods[date].rating_after(competitor)
+
+    def rd_on(self, date, competitor):
+        return self.rating_periods[date].rd_on(competitor)
+
+    def rd_after(self, date, competitor):
+        return self.rating_periods[date].rd_after(competitor)

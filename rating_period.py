@@ -20,8 +20,14 @@ class RatingPeriod:
     def glicko_rating_for(self, competitor):
         return self.glicko_ratings[competitor]
 
-    def rating_for(self, competitor):
+    def rating_on(self, competitor):
+        return self.glicko_rating_for(competitor).rating
+
+    def rating_after(self, competitor):
         return self.glicko_rating_for(competitor).end_glicko_rating.rating
 
-    def rd_for(self, competitor):
+    def rd_on(self, competitor):
         return self.glicko_rating_for(competitor).rd
+
+    def rd_after(self, competitor):
+        return self.glicko_rating_for(competitor).end_glicko_rating.rd

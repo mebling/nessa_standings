@@ -15,7 +15,7 @@ def chart_data(school_id):
     school = db.session.query(School).filter_by(id=school_id).first()
     data = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().ratings_for(school_id))]
     rds = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().rds_after(school_id))]
-    return [{ 'name': school.name, 'data': data }, { 'name': 'RD', 'data': rds }]
+    return [{ 'name': 'Rating', 'data': data }, { 'name': 'RD', 'data': rds }]
 
 
 def rating_for(school):

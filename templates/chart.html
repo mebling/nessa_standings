@@ -14,10 +14,11 @@
       chart_data[i].data[j][0] = date
     }
   }
+  var schoolName = {{ school_name|tojson|safe }}
 
   Highcharts.stockChart('container', {
       title: {
-          text: chart_data[0].name + " NESSA Rating"
+          text: schoolName + " NESSA Rating"
       },
       yAxis: {
           title: {
@@ -38,7 +39,7 @@
               if(change>0) {
                 change = "+" + change
               }
-              tooltips.push("<b>" + date + "</b><br/>" + point.y.toFixed(2) + " (" + change + ")")
+              tooltips.push("<b>" + point.series.name + "</b><br/><b>" + date + "</b><br/>" + point.y.toFixed(2) + " (" + change + ")")
             }
             return tooltips
           }

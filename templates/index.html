@@ -1,4 +1,16 @@
+<head>
+  <style>
+    table, th, td {
+        border: 1px solid black;
+    }
+  </style>
+</head>
 <table>
+<tr>
+  <th>School Name</th>
+  <th>Matchups</th>
+  <th>Rating</th>
+</tr>
 {% for school in schools %}
 <tr>
    <td class="school_name"><a href="/schools/{{school['id']}}">{{school['name']}}</a></td>

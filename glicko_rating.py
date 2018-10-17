@@ -41,6 +41,6 @@ class GlickoRating:
             d2 = (self.Q ** 2 * d2_sum) ** -1
             denom = self.rd ** -2 + d2 ** -1
             rating = self.rating + self.Q / denom * difference
-            rd = self._transformed_rd(math.sqrt(1. / denom))
+            rd = math.sqrt(1. / denom)
             self._end_glicko_rating = GlickoRating(rating, rd)
         return self._end_glicko_rating

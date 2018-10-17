@@ -1,7 +1,7 @@
 from results_scraper import ResultsScraper
 from functools import lru_cache
 from base_scraper import BaseScraper
-from models import Season
+from models import Season, Race, db
 from datetime import date
 
 
@@ -37,8 +37,11 @@ class Scraper(BaseScraper):
     def scrape(self):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
         if self.is_valid:
+            season = Season.find_or_create(2000 + self.year if self.year else date.today().year)
+            races = db.session.query(Race).filter_by(season_id=season.id)
+            races.delete()
+            db.session.commit()
             for link in self._school_links:
-                season = Season.find_or_create(2000 + self.year if self.year else date.today().year)
                 ResultsScraper(season, self.url.split("standings.asp")[0], link).scrape()
             return True
         return False

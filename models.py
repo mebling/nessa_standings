@@ -69,7 +69,7 @@ class Race(db.Model):
 
     school = relationship("School", foreign_keys=[school_id])
     opponent = relationship("School", foreign_keys=[opponent_id])
-    #season = relationship("Season", foreign_keys=[season_id])
+    season = relationship("Season", foreign_keys=[season_id], backref="races")
 
     @classmethod
     def find_or_create(cls, **kargs):

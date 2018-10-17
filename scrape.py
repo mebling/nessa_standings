@@ -1,13 +1,10 @@
 from scraper import Scraper
-import datetime
+from datetime import date
 from app import app
 
 
-START_YEAR = 9
-
-
 def scrape_all():
-    year = START_YEAR
+    year = date.today().year - 2000
     while Scraper(year).scrape():
         year += 1
     Scraper().scrape()

@@ -16,7 +16,7 @@ class GlickoRating:
 
     @property
     def _g(self):
-        return (math.sqrt(1 + 3 * (self.Q ** 2) * self.rd ** 2 / math.pi ** 2))
+        return 1/(math.sqrt(1 + 3 * (self.Q ** 2) * self.rd ** 2 / math.pi ** 2))
 
     def _expected_score(self, glicko_rating):
         exponent = (-1 * glicko_rating._g * (self.rating - glicko_rating.rating)) / 400.

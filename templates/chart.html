@@ -41,7 +41,7 @@
               }
               tooltips.push("<b>" + point.series.name + "</b><br/><b>" + date + "</b><br/>" + point.y.toFixed(2) + " (" + change + ")")
             }
-            return tooltips
+            return tooltips.reverse()
           }
       },
       colors: ['#6CF', '#39F', '#06C', '#036', '#000'],

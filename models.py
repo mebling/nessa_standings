@@ -87,3 +87,16 @@ class Race(db.Model):
             db.session.add(new)
             db.session.commit()
             return new
+
+
+class Rating(db.Model):
+    __tablename__ = 'ratings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
+
+    date = db.Column(db.Date, nullable=False, index=True)
+    rating = db.Column(db.Integer, nullable=False)
+    rd = db.Column(db.Integer, nullable=False)
+
+    school = relationship("School", foreign_keys=[school_id])

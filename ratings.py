@@ -1,25 +1,17 @@
-from models import School, Race, db
+from models import School, Race, Rating, db
 from collections import defaultdict
-from arena import Arena
-from functools import lru_cache
-
-
-@lru_cache()
-def arena(date=None):
-    races = db.session.query(Race).all()
-    matchups = [[race.date, race.school_id, race.opponent_id, race.school_score, race.opponent_score] for race in races]
-    return Arena(matchups)
 
 
 def chart_data(school_id):
-    school = db.session.query(School).filter_by(id=school_id).first()
-    data = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().ratings_for(school_id))]
-    rds = [[date.strftime("%b-%d-%Y"), rating] for date, rating in zip(arena().dates, arena().rds_after(school_id))]
+    ratings = db.session.query(Rating).filter(Rating.school_id == school_id).order_by(Rating.date)
+    data = [[rating.date.strftime("%b-%d-%Y"), rating.rating] for rating in ratings]
+    rds = [[rating.date.strftime("%b-%d-%Y"), rating.rd] for rating in ratings]
     return [{ 'name': 'Rating', 'data': data }, { 'name': 'RD', 'data': rds }]
 
 
 def rating_for(school):
-    return arena().rating_for(school.id)
+    rating_query = db.session.query(Rating).filter(Rating.school_id == school.id).order_by(Rating.date.desc())
+    return rating_query.first().rating
 
 
 def matchups_for(school_id):
@@ -28,23 +20,26 @@ def matchups_for(school_id):
     for race in races:
         matchups[race.date].append(race)
     data = []
-    dates = arena().dates
+    ratings = db.session.query(Rating).all()
+    rating_data = defaultdict(dict)
+    for rating in ratings:
+        rating_data[rating.school_id][rating.date] = rating
+    ratings = rating_data[school_id]
+    dates = list(rating_data[school_id].keys())
     dates.reverse()
-    ratings = arena().ratings_for(school_id)
-    ratings.reverse()
-    rds = arena().rds_on(school_id)
-    rds.reverse()
-    for i, (date, rating, rd) in enumerate(zip(dates, ratings, rds)):
+
+    for i, date in enumerate(dates):
         races = matchups[date]
         if len(races) == 0:
             continue
-        previous_rating = ratings[i + 1] if i + 1 < len(dates) else 1500
+        previous_rating = ratings[dates[i-1]].rating if i - 1 > 0 else 1500
+        rating = ratings[date]
         descriptions = []
         for race in races:
             if race.school_id == school_id:
-                descriptions.append("{} ({} | {}): {}-{}".format(race.opponent.name, round(arena().rating_on(date, race.opponent_id), 2), round(arena().rd_on(date, race.opponent_id), 2), race.school_score, race.opponent_score))
+                descriptions.append("{} ({} | {}): {}-{}".format(race.opponent.name, round(rating_data[race.opponent_id][date].rating, 2), round(rating_data[race.opponent_id][date].rd, 2), race.school_score, race.opponent_score))
             else:
-                descriptions.append("{} ({} | {}): {}-{}".format(race.school.name, round(arena().rating_on(date, race.school_id), 2), round(arena().rd_on(date, race.school_id) ,2), race.opponent_score, race.school_score))
+                descriptions.append("{} ({} | {}): {}-{}".format(race.school.name, round(rating_data[race.school_id][date].rating, 2), round(rating_data[race.school_id][date].rd ,2), race.opponent_score, race.school_score))
         description = ", ".join(descriptions)
-        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating, 'description': description, 'rd': rd })
+        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating.rating, 'description': description, 'rd': rating.rd })
     return data

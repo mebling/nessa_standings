@@ -2,7 +2,7 @@ import datetime
 from copy import copy
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-
+import datetime
 
 db = SQLAlchemy()
 NAME_MAPPINGS = {
@@ -58,6 +58,7 @@ class Season(db.Model):
 class Race(db.Model):
     __tablename__ = 'races'
 
+    created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column('school_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)
     opponent_id = db.Column('opponent_id', db.Integer, db.ForeignKey("schools.id"), nullable=False)

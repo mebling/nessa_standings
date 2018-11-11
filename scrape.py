@@ -15,6 +15,7 @@ def scrape_all():
 
 
 def _rebuild_ratings():
+    db.session.flush()
     db.session.query(Rating).delete()
     races = db.session.query(Race).all()
     matchups = [[race.date, race.school_id, race.opponent_id, race.school_score, race.opponent_score] for race in races]

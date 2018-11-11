@@ -23,7 +23,6 @@ def _rebuild_ratings():
     schools = db.session.query(School).all()
     dates = arena.dates
     for school in tqdm(schools):
-        print("Rebuilding ratings for {}".format(school.name))
         ratings = arena.ratings_for(school.id)
         rds = arena.rds_after(school.id)
         for rating, rd, date in zip(ratings, rds, dates):

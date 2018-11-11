@@ -5,14 +5,15 @@ class GlickoRating:
     C = 30
     Q = 0.0057565
 
-    def __init__(self, rating=1500, rd=350):
+    def __init__(self, rating=1500, rd=350, adjust_score=False, min_rd=350):
+        self.adjust_score = adjust_score
         self.rating = rating
-        self.rd = self._transformed_rd(rd)
+        self.rd = self._transformed_rd(rd, min_rd)
         self.matches = {}
         self._end_glicko_rating = None
 
-    def _transformed_rd(self, rd):
-        return min([350, math.sqrt(rd ** 2 + self.C ** 2)])
+    def _transformed_rd(self, rd, min_rd):
+        return min([min_rd, math.sqrt(rd ** 2 + self.C ** 2)])
 
     @property
     def _g(self):
@@ -44,3 +45,9 @@ class GlickoRating:
             rd = math.sqrt(1. / denom)
             self._end_glicko_rating = GlickoRating(rating, rd)
         return self._end_glicko_rating
+
+    def adjust(self, mean, standard_deviation):
+        if seld.rating > mean:
+            self.rating -= standard_deviation
+        elif self.rating < mean:
+            self.rating += standard_deviation

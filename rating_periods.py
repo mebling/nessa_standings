@@ -13,7 +13,8 @@ class RatingPeriods:
         previous = None
         for d in self.dates:
             period_matches = [m for m in self.matches if m.date == d]
-            rating_period = RatingPeriod(self._competitors, period_matches, previous_rating_period=self.rating_periods.get(previous))
+            adjust_score = d.month == 1 and d.day == 1
+            rating_period = RatingPeriod(self._competitors, period_matches, previous_rating_period=self.rating_periods.get(previous), adjust_score=adjust_score)
             self.rating_periods[d] = rating_period
             previous = d
 

@@ -29,7 +29,7 @@ def _rebuild_ratings():
         for rating, rd, date in zip(ratings, rds, dates):
             rating = Rating(school_id=school.id, rating=rating, rd=rd, date=date)
             db.session.add(rating)
-    db.session.commit()
+        db.session.commit()
 
 
 if __name__ == '__main__':

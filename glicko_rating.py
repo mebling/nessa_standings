@@ -47,7 +47,7 @@ class GlickoRating:
         return self._end_glicko_rating
 
     def adjust(self, mean, standard_deviation):
-        if seld.rating > mean:
+        if self.rating > mean:
             self.rating -= standard_deviation
         elif self.rating < mean:
             self.rating += standard_deviation

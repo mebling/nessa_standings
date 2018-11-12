@@ -4,10 +4,11 @@ import numpy as np
 
 class RatingPeriod:
     def __init__(self, competitors, matches, previous_rating_period=None, adjust_score=False):
-        self.adjust_score = adjust_score
         self.matches = matches
         self.previous_rating_period = previous_rating_period
         self.glicko_ratings = {}
+        if adjust_score:
+            self._adjust_all_ratings()
         self._set_glicko_ratings(competitors)
 
     def _set_glicko_ratings(self, competitors):
@@ -21,18 +22,16 @@ class RatingPeriod:
 
 
     def _adjust_all_ratings(self):
-        if not self.adjust_score:
-            pass
-        ratings = []
-        for c in self.competitors:
-            rating = self.previous_rating_period.glicko_rating_for(c)
-            ratings.append(rating.rating)
-        mean = np.average(ratings)
-        standard_deviation = np.std(rating)
-        for c in self.competitors:
-            rating = self.previous_rating_period.glicko_rating_for(c)
-            rating.adjust(mean, standard_deviation)
+        if not self.previous_rating_period:
+            return
+        glicko_ratings = self.previous_rating_period.glicko_ratings.values()
+        ratings = [rating.rating for rating in glicko_ratings]
 
+        mean = np.average(ratings)
+        standard_deviation = np.std(ratings)
+
+        for rating in glicko_ratings:
+            rating.adjust(mean, standard_deviation)
 
     def glicko_rating_for(self, competitor):
         return self.glicko_ratings[competitor]

@@ -11,3 +11,4 @@ python_dateutil==2.7.3
 gunicorn==19.9.0
 psycopg2==2.7.3.2
 elote==0.0.1
+numpy==1.13.1

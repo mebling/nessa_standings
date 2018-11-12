@@ -41,5 +41,5 @@ def matchups_for(school_id):
             else:
                 descriptions.append("{} ({} | {}): {}-{}".format(race.school.name, round(rating_data[race.school_id][date].rating, 2), round(rating_data[race.school_id][date].rd ,2), race.opponent_score, race.school_score))
         description = ", ".join(descriptions)
-        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating.rating, 'description': description, 'rd': rating.rd })
+        data.append({'date': date.strftime("%b %d, %Y"), 'previous_rating': previous_rating, 'rating': rating.rating, 'description': description, 'rd': ratings[dates[i+1]].rd })
     return data

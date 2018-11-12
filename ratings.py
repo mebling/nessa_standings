@@ -20,7 +20,11 @@ def matchups_for(school_id):
     for race in races:
         matchups[race.date].append(race)
     data = []
-    ratings = db.session.query(Rating).all()
+    school_ids = []
+    for race in races:
+        school_ids.append(race.school_id)
+        school_ids.append(race.opponent_id)
+    ratings = db.session.query(Rating).filter(Rating.school_id.in_(list(set(school_ids)))).all()
     rating_data = defaultdict(dict)
     for rating in ratings:
         rating_data[rating.school_id][rating.date] = rating

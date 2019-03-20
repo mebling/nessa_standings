@@ -7,7 +7,8 @@ from tqdm import tqdm
 
 
 def scrape_all():
-    year = date.today().year - 2000
+    # TODO get this to be valid
+    year = 2018 - 2000
     while Scraper(year).scrape():
         year += 1
     Scraper().scrape()

@@ -36,12 +36,12 @@ class Scraper(BaseScraper):
 
     def scrape(self):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
-        if self.is_valid:
-            season = Season.find_or_create(2000 + self.year if self.year else date.today().year)
-            races = db.session.query(Race).filter_by(season_id=season.id)
-            races.delete()
-            db.session.commit()
-            for link in self._school_links:
-                ResultsScraper(season, self.url.split("standings.asp")[0], link).scrape()
-            return True
-        return False
+        if not self.is_valid:
+            return False
+        season = Season.find_or_create(2000 + self.year if self.year else date.today().year)
+        races = db.session.query(Race).filter_by(season_id=season.id)
+        races.delete()
+        db.session.commit()
+        for link in self._school_links:
+            ResultsScraper(season, self.url.split("standings.asp")[0], link).scrape()
+        return True

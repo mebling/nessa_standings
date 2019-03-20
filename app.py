@@ -1,11 +1,11 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, render_template
+from flask import Flask
 from flask_cors import CORS
 from flask import jsonify
 import datetime
 from flask_migrate import Migrate
 from models import db, School
-from ratings import chart_data, rating_for, matchups_for
+from ratings import rating_for, matchups_for
 import os
 
 
@@ -26,13 +26,6 @@ def index():
     return jsonify({'schools': schools})
 
 
-@app.route("/matchups/<school_id>", methods=["GET"])
+@app.route("/schools/<school_id>/matchups", methods=["GET"])
 def matchups(school_id):
-    return render_template("matchups.html", matchups=matchups_for(int(school_id)))
-
-
-@app.route("/schools/<school_id>", methods=["GET"])
-def schools(school_id):
-    data = chart_data(int(school_id))
-    school_name = db.session.query(School).filter_by(id=school_id).first().name
-    return render_template("chart.html", highchart_json=data, school_name=school_name)
+    return jsonify({'matchups': matchups_for(int(school_id))})

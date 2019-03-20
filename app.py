@@ -23,7 +23,7 @@ def index():
     schools = db.session.query(School).order_by(School.name).all()
     schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
     schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
-    return render_template("index.html", schools=schools)
+    return jsonify({'schools': schools})
 
 
 @app.route("/matchups/<school_id>", methods=["GET"])

@@ -2,52 +2,85 @@ from datetime import date
 from tqdm import tqdm
 import boto3
 import json
+from collections import defaultdict, namedtuple
 
 from scraper import Scraper
-from app import app
-from models import db, School, Rating, Race
 from arena import Arena
-from ratings import rating_for, matchups_for
+
+
+Rating = namedtuple('Rating', 'school_id date rating rd')
 
 
 def scrape_all():
-    year = 9
-    while Scraper(year).scrape():
+    year = 0
+    schools = {}
+    races = defaultdict(list)
+    while Scraper(schools, races, year).scrape():
         year += 1
-    Scraper().scrape()
-    _rebuild_ratings()
-    _write_index_json_file()
-    _write_school_json_files()
+    Scraper(schools, races).scrape()
+    schools = list(schools.values())
+    all_races = defaultdict(list)
+    for s_id, school_races in races.items():
+        for r in school_races:
+            if not all_races.get(r.opponent_id):
+                all_races[s_id].extend(r)
+    ratings = _ratings(schools, [item for sublist in all_races.values() for item in sublist])
+    _write_index_json_file(schools, ratings)
+    _write_school_json_files(schools, races, ratings)
 
 
-def _rebuild_ratings():
-    db.session.flush()
-    db.session.query(Rating).delete()
-    races = db.session.query(Race).all()
+def _ratings(schools, races):
     matchups = [[race.date, race.school_id, race.opponent_id, race.school_score, race.opponent_score] for race in races]
     arena = Arena(matchups)
-    schools = db.session.query(School).all()
     dates = arena.dates
+    ratings = defaultdict(list)
     for school in tqdm(schools):
-        ratings = arena.ratings_for(school.id)
+        all_ratings = arena.ratings_for(school.id)
         rds = arena.rds_after(school.id)
-        for rating, rd, date in zip(ratings, rds, dates):
+        for rating, rd, date in zip(all_ratings, rds, dates):
             rating = Rating(school_id=school.id, rating=rating, rd=rd, date=date)
-            db.session.add(rating)
-        db.session.commit()
+            ratings[school.id].append(rating)
+    return ratings
 
 
-def _write_index_json_file():
-    schools = db.session.query(School).order_by(School.name).all()
-    schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
+def _write_index_json_file(schools, ratings):
+    schools = [{'name': school.name, 'id': school.id, 'rating': ratings[school.id][-1]} for school in schools]
     schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
     _write_json_file({'schools': schools}, 'index')
 
 
-def _write_school_json_files():
-    schools = db.session.query(School).all()
+def _write_school_json_files(schools, races, ratings):
     for school in tqdm(schools):
-        _write_json_file({'matchups': matchups_for(school.id)}, school.id)
+        _write_json_file({'matchups': _matchups_for(school.id, races[school.id], ratings)}, school.id)
+
+
+def _matchups_for(school_id, races, ratings):
+    school_ids = [school_id]
+    for race in races:
+        school_ids.append(race.opponent_id)
+    ratings = []
+    for s_id in school_ids:
+        ratings.extend(ratings[s_id])
+    rating_data = defaultdict(dict)
+    for rating in ratings:
+        rating_data[rating.school_id][rating.date] = rating
+    data = []
+    for i, race in enumerate(races):
+        for race in races:
+            opponent_id = race.opponent_id
+            opponent_score = race.opponent_score
+            school_score = race.school_score
+            data.append({
+                'opponent_id': opponent_id,
+                'school_score': school_score,
+                'opponent_score': opponent_score,
+                'date': race.date.strftime("%b %d, %Y"),
+                'school_rating': rating_data[school_id][race.date].rating,
+                'opponent_rating': rating_data[opponent_id][race.date].rating,
+                'school_rd': rating_data[school_id][race.date].rd,
+                'opponent_rd': rating_data[opponent_id][race.date].rd
+                })
+    return data
 
 
 def _write_json_file(json_data, filename):
@@ -59,5 +92,4 @@ def _write_json_file(json_data, filename):
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        scrape_all()
+    scrape_all()

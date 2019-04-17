@@ -1,15 +1,18 @@
-from results_scraper import ResultsScraper
 from functools import lru_cache
-from base_scraper import BaseScraper
-from models import Season, Race, db
 from datetime import date
+from collections import defaultdict
+
+from results_scraper import ResultsScraper
+from base_scraper import BaseScraper
 
 
 URL = "http://taboracademy.net/nessa/standings.asp"
 
 
 class Scraper(BaseScraper):
-    def __init__(self, year=None):
+    def __init__(self, schools, races, year=None):
+        self.schools = schools
+        self.races = races
         self.year = year
         if not year:
             self.url = URL
@@ -38,10 +41,6 @@ class Scraper(BaseScraper):
         print("SCRAPING FOR THE YEAR '{}".format(self.year))
         if not self.is_valid:
             return False
-        season = Season.find_or_create(2000 + self.year if self.year else date.today().year)
-        races = db.session.query(Race).filter_by(season_id=season.id)
-        races.delete()
-        db.session.commit()
         for link in self._school_links:
-            ResultsScraper(season, self.url.split("standings.asp")[0], link).scrape()
+            ResultsScraper(self.schools, self.races, self.url.split("standings.asp")[0], link).scrape()
         return True

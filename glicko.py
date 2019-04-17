@@ -6,7 +6,6 @@
     :copyright: (c) 2012 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
 """
-import datetime
 import math
 import time
 

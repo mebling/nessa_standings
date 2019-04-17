@@ -1,18 +1,23 @@
-from scraper import Scraper
 from datetime import date
+from tqdm import tqdm
+import boto3
+import json
+
+from scraper import Scraper
 from app import app
 from models import db, School, Rating, Race
 from arena import Arena
-from tqdm import tqdm
+from ratings import rating_for, matchups_for
 
 
 def scrape_all():
-    # TODO get this to be valid
-    year = 2018 - 2000
+    year = 9
     while Scraper(year).scrape():
         year += 1
     Scraper().scrape()
     _rebuild_ratings()
+    _write_index_json_file()
+    _write_school_json_files()
 
 
 def _rebuild_ratings():
@@ -30,6 +35,27 @@ def _rebuild_ratings():
             rating = Rating(school_id=school.id, rating=rating, rd=rd, date=date)
             db.session.add(rating)
         db.session.commit()
+
+
+def _write_index_json_file():
+    schools = db.session.query(School).order_by(School.name).all()
+    schools = [{'name': school.name, 'id': school.id, 'rating': rating_for(school)} for school in schools]
+    schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
+    _write_json_file({'schools': schools}, 'index')
+
+
+def _write_school_json_files():
+    schools = db.session.query(School).all()
+    for school in tqdm(schools):
+        _write_json_file({'matchups': matchups_for(school.id)}, school.id)
+
+
+def _write_json_file(json_data, filename):
+    s3 = boto3.resource('s3')
+    s3_object = boto3.resource('s3').Object('nessa_rankings', '{}.json'.format(filename))
+    s3_object.put(
+        Body=(bytes(json.dumps(json_data).encode('UTF-8')))
+    )
 
 
 if __name__ == '__main__':

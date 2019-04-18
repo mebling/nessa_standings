@@ -39,19 +39,12 @@ class ResultsScraper(BaseScraper):
 
     def _create_race(self, match):
         print(match)
-        results = [s for s in match['Score'].replace(" ", "").split("-") if s != ""]
+        results = [int(s) for s in match['Score'].replace(" ", "").split("-") if s != ""]
         school_score, opponent_score = results
         date = parser.parse(match['Date'])
         opponent_name = match['Opponent'].replace('At ', '')
         opponent_school = self._school(opponent_name)
-        status = match['Result']
-        score_a, score_b = results
-        if status == "Win":
-            school_score = max(score_a, score_b)
-            opponent_score = min(score_a, score_b)
-        else:
-            opponent_score = max(score_a, score_b)
-            school_score = min(score_a, score_b)
+        school_score, opponent_score = sorted(results, reverse=match['Result'] == 'Win')
         race = Race(school_id=self._school().id, opponent_id=opponent_school.id, date=date.date(), school_score=school_score, opponent_score=opponent_score)
         self.races[self._school().id].append(race)
 
@@ -69,4 +62,4 @@ class ResultsScraper(BaseScraper):
             for col, val in zip(columns, elem):
                 match[col] = val.text_content()
             self._create_race(match)
-        return self.schools, self.races
+        return True

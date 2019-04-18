@@ -12,21 +12,21 @@ Rating = namedtuple('Rating', 'school_id date rating rd')
 
 
 def scrape_all():
-    year = 0
+    year = 9
     schools = {}
     races = defaultdict(list)
     while Scraper(schools, races, year).scrape():
         year += 1
     Scraper(schools, races).scrape()
     schools = list(schools.values())
-    all_races = defaultdict(list)
+    all_races = []
+    processed_schools = []
     for s_id, school_races in races.items():
+        processed_schools.append(s_id)
         for r in school_races:
-            if not all_races.get(r.opponent_id):
-                all_races[s_id].extend(r)
-    ratings = _ratings(schools, [item for sublist in all_races.values() for item in sublist])
-    _write_index_json_file(schools, ratings)
-    _write_school_json_files(schools, races, ratings)
+            if r.opponent_id not in processed_schools:
+                all_races.append(r)
+    _write_json_file(schools, races, _ratings(schools, all_races))
 
 
 def _ratings(schools, races):
@@ -43,26 +43,23 @@ def _ratings(schools, races):
     return ratings
 
 
-def _write_index_json_file(schools, ratings):
-    schools = [{'name': school.name, 'id': school.id, 'rating': ratings[school.id][-1]} for school in schools]
-    schools = sorted(schools, key=lambda k: k['rating'], reverse=True)
-    _write_json_file({'schools': schools}, 'index')
-
-
-def _write_school_json_files(schools, races, ratings):
+def _write_json_file(schools, races, ratings):
+    school_dic = [{'name': school.name, 'id': school.id, 'rating': ratings[school.id][-1]} for school in schools]
+    school_dic = sorted(school_dic, key=lambda k: k['rating'], reverse=True)
+    all_data = {'schools': schools}
+    all_data['matchups'] = {}
     for school in tqdm(schools):
-        _write_json_file({'matchups': _matchups_for(school.id, races[school.id], ratings)}, school.id)
+        all_data['matchups'][school.id] = _matchups_for(school.id, races[school.id], ratings)
+    _write_json(all_data, 'nessa_rankings')
 
 
 def _matchups_for(school_id, races, ratings):
-    school_ids = [school_id]
-    for race in races:
-        school_ids.append(race.opponent_id)
-    ratings = []
+    school_ids = [school_id] + [race.opponent_id for race in races]
+    all_ratings = []
     for s_id in school_ids:
-        ratings.extend(ratings[s_id])
+        all_ratings.extend(ratings[s_id])
     rating_data = defaultdict(dict)
-    for rating in ratings:
+    for rating in all_ratings:
         rating_data[rating.school_id][rating.date] = rating
     data = []
     for i, race in enumerate(races):
@@ -83,7 +80,7 @@ def _matchups_for(school_id, races, ratings):
     return data
 
 
-def _write_json_file(json_data, filename):
+def _write_json(json_data, filename):
     s3 = boto3.resource('s3')
     s3_object = boto3.resource('s3').Object('nessa_rankings', '{}.json'.format(filename))
     s3_object.put(
